@@ -1,0 +1,32 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "test-mesh": {
+      "commandName": "Project",
+      "commandLineArgs": "test-mesh \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\""
+    },
+    "test-load-obj 5579": {
+      "commandName": "Project",
+      "commandLineArgs": "test-load-obj \"D:\\Programming\\Conquer\\Clients\\5579\\c3\\mesh\\410330.C3\""
+    },
+    "test-load-obj 5165": {
+      "commandName": "Project",
+      "commandLineArgs": "test-load-obj \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\410330.C3\""
+    },
+    "test-load model": {
+      "commandName": "Project",
+      "commandLineArgs": "test-load-obj \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\""
+    },
+    "test-ini": {
+      "commandName": "Project",
+      "commandLineArgs": "test-ini \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "test-meshes": {
+      "commandName": "Project",
+      "commandLineArgs": "test-meshes \"D:\\Programming\\Conquer\\Clients\\5579\\c3\""
+    }
+  }
+}
