@@ -8,15 +8,14 @@ using IniParser.Model;
 
 namespace C3.IniFiles.Loaders
 {
-    public static class RolePartInfoLoader
+    internal static class RolePartInfoLoader
     {
-        public static Dictionary<uint, RolePartInfo> Load(TextReader tr)
+        internal static Dictionary<uint, RolePartInfo> Load(TextReader tr)
         {
             Dictionary<uint, RolePartInfo> result = new();
 
             IniDataParser parser = new IniDataParser();
             IniData data = parser.Parse(tr);
-            var whattype = data["345"];
 
             foreach(var dataPiece in data.Sections)
             {

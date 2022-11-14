@@ -4,7 +4,7 @@ namespace C3
 {
     public class C3KeyFrame
     {
-        public uint Pos;
-        public Matrix[]? Matricies;
+        public uint FrameNumber { get; set; }
+        public Matrix[] Matricies { get; set; }
     }
 }

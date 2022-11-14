@@ -2,9 +2,9 @@
 {
     public class C3Frame
     {
-        public int Frame;
-        public float floatParam;
-        public bool boolParam;
-        public int intParam;
+        public int Frame { get; set; }
+        public float floatParam { get; set; }
+        public bool boolParam { get; set; }
+        public int intParam { get; set; }
     }
 }

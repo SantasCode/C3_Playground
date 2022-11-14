@@ -10,4 +10,10 @@
     <PackageReference Include="ini-parser-netcore" Version="3.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="MonsterLookface.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -9,7 +9,6 @@ namespace C3.Loaders
     {
         public static C3Phy Load(BinaryReader br, string Type)
         {
-            Console.WriteLine(Type);
             C3Phy phy = new();
 
             phy.Name = br.ReadASCIIString(br.ReadInt32());
@@ -110,14 +109,10 @@ namespace C3.Loaders
         {
             var vert = new PhyVertex()
             {
-                pos = new Vector3[PhyVertex.MORPH_MAX],
-                index = new uint[PhyVertex.BONE_MAX],
-                weight = new float[PhyVertex.BONE_MAX]
+                BoneWeights = new(uint, float)[PhyVertex.BONE_MAX]
             };
 
-            vert.pos[0] = br.ReadVector3();
-            for (int v = 1; v < PhyVertex.MORPH_MAX; v++)
-                vert.pos[v] = Vector3.Zero;
+            vert.Position = br.ReadVector3();
 
             if (Type == "PHY " || Type == "PHY2")
                 br.BaseStream.Seek(0x24, SeekOrigin.Current);
@@ -125,15 +120,19 @@ namespace C3.Loaders
             vert.U = br.ReadSingle();
             vert.V = br.ReadSingle();
 
-            vert.color = br.ReadUInt32();
+            vert.Color = br.ReadUInt32();
 
-            for (int b = 0; b < PhyVertex.BONE_MAX; b++)
-                vert.index[b] = br.ReadUInt32();
-            for (int b = 0; b < PhyVertex.BONE_MAX; b++)
-                vert.weight[b] = br.ReadSingle();
+            uint b1Idx = br.ReadUInt32();
+            uint b2Idx = br.ReadUInt32();
+
+            float b1Weight = br.ReadSingle();
+            float b2Weight = br.ReadSingle();
+
+            vert.BoneWeights[0] = (b1Idx, b1Weight);
+            vert.BoneWeights[1] = (b2Idx, b2Weight);
 
             if (Type == "PHY2" || Type == "PHY3")
-                vert.unknownV3 = br.ReadVector3();
+                vert.UnknownVector3 = br.ReadVector3();
 
             return vert;
         }

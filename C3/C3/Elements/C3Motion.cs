@@ -5,19 +5,19 @@ namespace C3.Elements
 {
     public class C3Motion
     {
-        public uint BoneCount;
-        public uint FrameCount;
+        public uint BoneCount { get; set; }
+        public uint FrameCount { get; set; }
 
-        public uint KeyFramesCount;
-        public C3KeyFrame[]? KeyFrames;
+        public uint KeyFramesCount { get; set; }
+        public C3KeyFrame[] BoneKeyFrames { get; set; }
 
-        public Matrix[]? Matrix;
+        public Matrix[]? BoneMatricies { get; set; }
 
-        public uint MorphCount;
-        public float[] morph;
-        public int Frame;
+        public uint MorphCount { get; set; }
+        public float[] morph { get; set; }
+        public int Frame { get; set; }
 
         //Additional, not in file.
-        public string? Type;
+        public string? Type { get; set; }
     }
 }

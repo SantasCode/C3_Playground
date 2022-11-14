@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace C3.IniFiles
 {
-    public class RolePartInfo
+    internal class RolePartInfo
     {
         public uint PartCount;
         public List<RolePartSubInfo> Parts = new();
     }
 
-    public class RolePartSubInfo
+    internal class RolePartSubInfo
     {
         public uint MeshId;
         public uint TextureId;

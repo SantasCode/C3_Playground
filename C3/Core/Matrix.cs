@@ -3,7 +3,22 @@ namespace C3.Core
 {
     public class Matrix
     {
-        public float M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44;
+        public float M11 { get; set; }
+        public float M12 { get; set; }
+        public float M13 { get; set; } 
+        public float M14 { get; set; } 
+        public float M21 { get; set; } 
+        public float M22 { get; set; } 
+        public float M23 { get; set; } 
+        public float M24 { get; set; } 
+        public float M31 { get; set; } 
+        public float M32 { get; set; } 
+        public float M33 { get; set; } 
+        public float M34 { get; set; } 
+        public float M41 { get; set; } 
+        public float M42 { get; set; } 
+        public float M43 { get; set; } 
+        public float M44 { get; set; }
 
         public static Matrix Identity => new Matrix() { M11 = 1, M22 = 1, M33 = 1, M44 = 1 };
 

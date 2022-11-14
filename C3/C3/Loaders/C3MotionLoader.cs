@@ -12,10 +12,10 @@ namespace C3.Loaders
             mot.BoneCount = br.ReadUInt32();
             mot.FrameCount = br.ReadUInt32();
 
-            mot.Matrix = new Matrix[mot.BoneCount];
+            mot.BoneMatricies = new Matrix[mot.BoneCount];
 
             for (int i = 0; i < mot.BoneCount; i++)
-                mot.Matrix[i] = Core.Matrix.Identity;
+                mot.BoneMatricies[i] = Core.Matrix.Identity;
 
             mot.Type = br.ReadASCIIString(4);
 
@@ -25,19 +25,19 @@ namespace C3.Loaders
                     {
                         mot.KeyFramesCount = br.ReadUInt32();
 
-                        mot.KeyFrames = new C3KeyFrame[mot.KeyFramesCount];
+                        mot.BoneKeyFrames = new C3KeyFrame[mot.KeyFramesCount];
 
                         for (int i = 0; i < mot.KeyFramesCount; i++)
                         {
-                            mot.KeyFrames[i] = new()
+                            mot.BoneKeyFrames[i] = new()
                             {
-                                Pos = br.ReadUInt32(),
+                                FrameNumber = br.ReadUInt32(),
                                 Matricies = new Core.Matrix[mot.BoneCount]
                             };
 
 
                             for (int b = 0; b < mot.BoneCount; b++)
-                                mot.KeyFrames[i].Matricies[b] = br.ReadMatrix();
+                                mot.BoneKeyFrames[i].Matricies[b] = br.ReadMatrix();
                         }
                     }
                     break;
@@ -45,24 +45,24 @@ namespace C3.Loaders
                 case "ZKEY":
                     {
                         mot.KeyFramesCount = br.ReadUInt32();
-                        mot.KeyFrames = new C3KeyFrame[mot.KeyFramesCount];
+                        mot.BoneKeyFrames = new C3KeyFrame[mot.KeyFramesCount];
 
                         for (int i = 0; i < mot.KeyFramesCount; i++)
                         {
-                            mot.KeyFrames[i] = new()
+                            mot.BoneKeyFrames[i] = new()
                             {
-                                Pos = br.ReadUInt16(),
+                                FrameNumber = br.ReadUInt16(),
                                 Matricies = new Core.Matrix[mot.BoneCount]
                             };
 
                             for(int b = 0; b < mot.BoneCount; b++)
                             {
-                                mot.KeyFrames[i].Matricies[b] = Matrix.CreateFromQuaternion(br.ReadQuaternion());
+                                mot.BoneKeyFrames[i].Matricies[b] = Matrix.CreateFromQuaternion(br.ReadQuaternion());
 
-                                mot.KeyFrames[i].Matricies[b].M41 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M42 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M43 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M44 = 1.0f;
+                                mot.BoneKeyFrames[i].Matricies[b].M41 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M42 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M43 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M44 = 1.0f;
 
                             }
                         }
@@ -73,36 +73,36 @@ namespace C3.Loaders
                     {
                         mot.KeyFramesCount = br.ReadUInt32();
 
-                        mot.KeyFrames = new C3KeyFrame[mot.KeyFramesCount];
+                        mot.BoneKeyFrames = new C3KeyFrame[mot.KeyFramesCount];
 
                         for(int i = 0; i < mot.KeyFramesCount; i++)
                         {
-                            mot.KeyFrames[i] = new()
+                            mot.BoneKeyFrames[i] = new()
                             {
-                                Pos = br.ReadUInt16(),
+                                FrameNumber = br.ReadUInt16(),
                                 Matricies = new Core.Matrix[mot.BoneCount]
                             };
 
                             for (int b = 0; b < mot.BoneCount; b++)
                             {
-                                mot.KeyFrames[i].Matricies[b] = new();
+                                mot.BoneKeyFrames[i].Matricies[b] = new();
 
-                                mot.KeyFrames[i].Matricies[b].M11 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M12 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M13 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M14 = 0.0f;
-                                mot.KeyFrames[i].Matricies[b].M21 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M22 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M23 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M24 = 0.0f;
-                                mot.KeyFrames[i].Matricies[b].M31 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M32 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M33 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M34 = 0.0f;
-                                mot.KeyFrames[i].Matricies[b].M41 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M42 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M43 = br.ReadSingle();
-                                mot.KeyFrames[i].Matricies[b].M44 = 1.0f;
+                                mot.BoneKeyFrames[i].Matricies[b].M11 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M12 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M13 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M14 = 0.0f;
+                                mot.BoneKeyFrames[i].Matricies[b].M21 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M22 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M23 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M24 = 0.0f;
+                                mot.BoneKeyFrames[i].Matricies[b].M31 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M32 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M33 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M34 = 0.0f;
+                                mot.BoneKeyFrames[i].Matricies[b].M41 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M42 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M43 = br.ReadSingle();
+                                mot.BoneKeyFrames[i].Matricies[b].M44 = 1.0f;
                             }
                         }
                     }
@@ -114,13 +114,13 @@ namespace C3.Loaders
 
                         mot.KeyFramesCount = mot.FrameCount;
 
-                        mot.KeyFrames = new C3KeyFrame[mot.KeyFramesCount];
+                        mot.BoneKeyFrames = new C3KeyFrame[mot.KeyFramesCount];
 
                         for(int i = 0; i < mot.KeyFramesCount; i++)
                         {
-                            mot.KeyFrames[i] = new()
+                            mot.BoneKeyFrames[i] = new()
                             {
-                                Pos = (uint)i,
+                                FrameNumber = (uint)i,
                                 Matricies = new Matrix[mot.BoneCount]
                             };
                         }
@@ -128,7 +128,7 @@ namespace C3.Loaders
                         {
                             for(int i = 0; i < mot.KeyFramesCount; i++)
                             {
-                                mot.KeyFrames[i].Matricies[b] = br.ReadMatrix();
+                                mot.BoneKeyFrames[i].Matricies[b] = br.ReadMatrix();
                             }
                         }
                     }
