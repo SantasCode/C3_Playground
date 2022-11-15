@@ -12,11 +12,6 @@ namespace C3.Loaders
             mot.BoneCount = br.ReadUInt32();
             mot.FrameCount = br.ReadUInt32();
 
-            mot.BoneMatricies = new Matrix[mot.BoneCount];
-
-            for (int i = 0; i < mot.BoneCount; i++)
-                mot.BoneMatricies[i] = Core.Matrix.Identity;
-
             mot.Type = br.ReadASCIIString(4);
 
             switch (mot.Type)
