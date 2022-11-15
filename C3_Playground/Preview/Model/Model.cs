@@ -9,33 +9,56 @@ namespace C3_Playground.Preview.Model
     {
         private readonly GraphicsDevice _graphicsDevice;
 
-        public List<Model> Models { get; init; }
+        public Dictionary<string, Model> NamedParts { get; init; }
+
+        private readonly bool isBody;
+        private readonly bool isMount;
+        public bool IsBody => isBody;
+        public bool IsMount => isMount;
 
         public ModelRenderer(C3Model c3Model, GraphicsDevice graphicsDevice, Texture2D texture)
         {
+            if (c3Model.Meshs.Count != c3Model.Animations.Count) throw new Exception("Number of meshes does not match the number of motions. Need to analyze");
+            
             _graphicsDevice = graphicsDevice;
             
-            Models = new();
-
-            if (c3Model.Meshs.Count != c3Model.Animations.Count) throw new Exception("Number of meshes does not match the number of motions");
-
+            NamedParts = new();
             for (int i = 0; i < c3Model.Meshs.Count; i++)
             {
-                if (c3Model.Animations[i].BoneCount > 1)
-                    Models.Add(new Model(c3Model.Meshs[i], c3Model.Animations[i], _graphicsDevice, texture));
+                NamedParts.Add(c3Model.Meshs[i].Name, new Model(c3Model.Meshs[i], c3Model.Animations[i], _graphicsDevice, texture));
             }
+
+            isBody = NamedParts.ContainsKey("v_body");
+            isMount = NamedParts.ContainsKey("v_mount");
         }
         public void Update(GameTime gameTime)
         {
-            foreach (var model in Models)
+            foreach (var model in NamedParts.Values)
                 model.Update(gameTime);
         }
         public void Draw(GameTime gameTime, BasicEffect basicEffect)
         {
-            foreach (var model in Models)
-              model.Draw(gameTime, basicEffect);
-            //Models[0].Draw(basicEffect, gameTime);
+            if (IsBody)
+                NamedParts["v_body"].Draw(gameTime, basicEffect);
+            else if (IsMount)
+                NamedParts["v_mount"].Draw(gameTime, basicEffect);
+            else
+                foreach (var model in NamedParts.Values)
+                    model.Draw(gameTime, basicEffect);
         }
+
+        private Matrix GetMatrix(string PartName)
+        {
+            if (!isBody) return Matrix.Identity;
+
+            if (NamedParts.TryGetValue(PartName, out Model model))
+                return model.GetTransform(0);
+
+            return Matrix.Identity;
+        }
+        public Matrix GetLWeapon() => GetMatrix("v_l_weapon");
+        public Matrix GetRWeapon() => GetMatrix("v_r_weapon");
+        public Matrix GetArmet() => GetMatrix("v_armet");
     }
 
     internal class Model
@@ -149,6 +172,11 @@ namespace C3_Playground.Preview.Model
             //It appears that the weight does not have an effect...not used in the eu client. Renders incorrectly when using weight.
             var result = Vector3.Transform(vertex, transform); //Matrix.Multiply(transform, weight));
             return result;
+        }
+
+        public Matrix GetTransform(uint BoneIndex)
+        {
+            return BaseMotion.GetMatrix(BoneIndex);
         }
     }
 }

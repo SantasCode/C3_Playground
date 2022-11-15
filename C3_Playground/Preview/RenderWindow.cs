@@ -72,11 +72,11 @@ namespace C3_Playground.Preview
             
             //Load a Mesh.
             C3Model? model = null;
-            using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\002132000.C3" : _modelFile)))
+            using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\002000000.c3" : _modelFile)))
                 model = C3ModelLoader.Load(br);
 
             //C3Model? danceAnimation = null;
-            //string animation = @"D:\Programming\Conquer\Clients\5165\c3\1002\000\100.C3";
+            //string animation = @"C:\Program Files (x86)\Conquer Online\Conquer Online 3.0\c3\monster\314\100.C3";
             //using (BinaryReader br = new BinaryReader(File.OpenRead(animation)))
             //    danceAnimation = C3ModelLoader.Load(br);
             //if (model != null && danceAnimation != null)
@@ -86,7 +86,7 @@ namespace C3_Playground.Preview
             //}
 
             Texture2D myTexture;
-            DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\texture\002132300.dds" : _textureFile, GraphicsDevice, false, out myTexture);
+            DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\texture\002000000.dds" : _textureFile, GraphicsDevice, false, out myTexture);
 
 
 
