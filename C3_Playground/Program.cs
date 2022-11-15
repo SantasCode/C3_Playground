@@ -70,6 +70,7 @@ namespace C3_Playground
             Console.WriteLine($"{file}");
             Console.WriteLine($"Mesh: {myModel.Meshs.Count} Anim: {myModel.Animations.Count}");
             Console.WriteLine($"Cameras: {myModel.Cameras.Count} Effects: {myModel.Effects.Count}");
+            Console.WriteLine($"Shape: {myModel.Shapes.Count} Smotions: {myModel.ShapeMotions.Count}");
 
             if (myModel.Meshs.Count == myModel.Animations.Count)
                 Console.WriteLine($"Equal parts of each.");
