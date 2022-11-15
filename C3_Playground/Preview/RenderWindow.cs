@@ -85,84 +85,105 @@ namespace C3_Playground.Preview
             viewMatrix = Matrix.CreateLookAt(cameraTarget + new Vector3(-1, -1, -1) * cameraPosition, cameraTarget, Vector3.Forward);
             projectionMatrix = Matrix.CreateOrthographic(500, 500, 0.001f, 20000f);
 
-
-            
-            //Load a Mesh.
             C3Model? model = null;
-            using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\002000000.c3" : _modelFile)))
-                model = C3ModelLoader.Load(br);
-
             C3Model? modelAnimation = null;
-            string animation = @"D:\Programming\Conquer\Clients\5579\c3\1002\000\100.C3";
-            using (BinaryReader br = new BinaryReader(File.OpenRead(animation)))
-                modelAnimation = C3ModelLoader.Load(br);
-            if (model != null && modelAnimation != null)
-            {
-                Console.WriteLine("Replaced motion with motion file");
-                model.Animations = modelAnimation.Animations;
-            }
-
-            Texture2D myTexture;
-            DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\texture\002000000.dds" : _textureFile, GraphicsDevice, false, out myTexture);
-            bodyEffect.Texture = myTexture;
-
-            ///Left Weapon
+            Texture2D? modelTexture = null;
             C3Model? weaponLModel = null;
-            using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410210.c3")))
-                weaponLModel = C3ModelLoader.Load(br);
-
-            Texture2D weaponLTexture;
-            DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\410216.dds", GraphicsDevice, false, out weaponLTexture);
-            weaponLEffect.Texture = weaponLTexture;
-
-
-            ///Right Weapon
+            Texture2D? weaponLTexture = null;
             C3Model? weaponRModel = null;
-            using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\480280.c3")))
-                weaponRModel = C3ModelLoader.Load(br);
-
-            Texture2D weaponRTexture;
-            DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\480285.dds", GraphicsDevice, false, out weaponRTexture);
-            weaponREffect.Texture = weaponRTexture;
-
-
-
-            ///Mount
+            Texture2D? weaponRTexture = null;
             C3Model? mountModel = null;
-            using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5579\c3\Mount\819\8190000.C3")))
-                mountModel = C3ModelLoader.Load(br);
-
-            Texture2D mountTexture;
-            DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5579\c3\Mount\819\8190000.dds", GraphicsDevice, false, out mountTexture);
-            mountEffect.Texture = mountTexture;
-            
+            Texture2D? mountTexture = null;
             C3Model? mountAnimation = null;
-            string mountAnim = @"D:\Programming\Conquer\Clients\5579\c3\Mount\819\100.C3";
-            using (BinaryReader br = new BinaryReader(File.OpenRead(mountAnim)))
-                mountAnimation = C3ModelLoader.Load(br);
-            if (mountModel != null && mountAnimation != null)
+
+            //CullClockwise draws the model "mirrored" correctly but looks screwed up.
+            //GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;
+
+            if (false) //Load a character w/ weapons and mount.
             {
-                Console.WriteLine("Replaced motion with motion file");
-                mountModel.Animations = mountAnimation.Animations;
+                //Load a Mesh.
+                using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\002000000.c3" : _modelFile)))
+                    model = C3ModelLoader.Load(br);
+
+                string animation = @"D:\Programming\Conquer\Clients\5579\c3\1002\000\100.C3";
+                using (BinaryReader br = new BinaryReader(File.OpenRead(animation)))
+                    modelAnimation = C3ModelLoader.Load(br);
+                if (model != null && modelAnimation != null)
+                {
+                    Console.WriteLine("Replaced motion with motion file");
+                    model.Animations = modelAnimation.Animations;
+                }
+
+                DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\texture\002000000.dds" : _textureFile, GraphicsDevice, false, out modelTexture);
+                bodyEffect.Texture = modelTexture;
+
+                ///Left Weapon
+                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410210.c3")))
+                    weaponLModel = C3ModelLoader.Load(br);
+
+                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\410216.dds", GraphicsDevice, false, out weaponLTexture);
+                weaponLEffect.Texture = weaponLTexture;
+                // Right Weapon
+                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\480280.c3")))
+                    weaponRModel = C3ModelLoader.Load(br);
+
+                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\480285.dds", GraphicsDevice, false, out weaponRTexture);
+                weaponREffect.Texture = weaponRTexture;
+                ///Mount
+                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5579\c3\Mount\819\8190000.C3")))
+                    mountModel = C3ModelLoader.Load(br);
+
+                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5579\c3\Mount\819\8190000.dds", GraphicsDevice, false, out mountTexture);
+                mountEffect.Texture = mountTexture;
+
+                string mountAnim = @"D:\Programming\Conquer\Clients\5579\c3\Mount\819\100.C3";
+                using (BinaryReader br = new BinaryReader(File.OpenRead(mountAnim)))
+                    mountAnimation = C3ModelLoader.Load(br);
+                if (mountModel != null && mountAnimation != null)
+                {
+                    Console.WriteLine("Replaced motion with motion file");
+                    mountModel.Animations = mountAnimation.Animations;
+                }
             }
+            else if (true) // Load effeect.
+            {
+                using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5579\c3\effect\arrow\500009\1.C3" : _modelFile)))
+                    model = C3ModelLoader.Load(br, true);
+
+                //string animation = @"D:\Programming\Conquer\Clients\5579\c3\1002\000\100.C3";
+                //using (BinaryReader br = new BinaryReader(File.OpenRead(animation)))
+                //    modelAnimation = C3ModelLoader.Load(br);
+                //if (model != null && modelAnimation != null)
+                //{
+                //    Console.WriteLine("Replaced motion with motion file");
+                //    model.Animations = modelAnimation.Animations;
+                //}
+
+                DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5579\c3\effect\AncientCity\1.dds" : _textureFile, GraphicsDevice, false, out modelTexture);
+                bodyEffect.Texture = modelTexture;
+            }
+
+
+
+
 
 
             if (model != null)
             {
-                myModels = new(model, GraphicsDevice, myTexture);
+                myModels = new(model, GraphicsDevice, modelTexture);
 
             }
-            if (weaponLModel != null)
+            if (weaponLModel != null && weaponLTexture != null)
             {
                 weaponLModels = new(weaponLModel, GraphicsDevice, weaponLTexture);
                 weaponLModels.SetParent(0, myModels.NamedParts["v_l_weapon"]);
             }
-            if (weaponRModel != null)
+            if (weaponRModel != null && weaponRTexture != null)
             {
                 weaponRModels = new(weaponRModel, GraphicsDevice, weaponRTexture);
                 weaponRModels.SetParent(0, myModels.NamedParts["v_r_weapon"]);
             }
-            if (mountModel != null)
+            if (mountModel != null && mountTexture != null)
             {
                 mountModels = new(mountModel, GraphicsDevice, mountTexture);
                 myModels.SetParentAll(mountModels.NamedParts["v_mount"]);
@@ -193,10 +214,10 @@ namespace C3_Playground.Preview
             viewMatrix = Matrix.CreateRotationX(dx * MathHelper.PiOver4) * Matrix.CreateRotationY(dy * MathHelper.PiOver4) * Matrix.CreateRotationZ(dz * MathHelper.PiOver4) * viewMatrix;
             #endregion 3d Model Rotation
 
-            myModels.Update(gameTime);
-            weaponLModels.Update(gameTime);
-            weaponRModels.Update(gameTime);
-            mountModels.Update(gameTime);
+            myModels?.Update(gameTime);
+            weaponLModels?.Update(gameTime);
+            weaponRModels?.Update(gameTime);
+            mountModels?.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -224,10 +245,10 @@ namespace C3_Playground.Preview
             //GraphicsDevice.SetVertexBuffer(vertexBuffer);
             //GraphicsDevice.Indices = indexBuffer;
 
-            myModels.Draw(gameTime, bodyEffect);
-            weaponLModels.Draw(gameTime, weaponLEffect);
-            weaponRModels.Draw(gameTime, weaponREffect);
-            mountModels.Draw(gameTime, mountEffect);
+            myModels?.Draw(gameTime, bodyEffect);
+            weaponLModels?.Draw(gameTime, weaponLEffect);
+            weaponRModels?.Draw(gameTime, weaponREffect);
+            mountModels?.Draw(gameTime, mountEffect);
 
             //basicEffect.VertexColorEnabled = true;
 

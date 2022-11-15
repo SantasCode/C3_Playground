@@ -37,6 +37,8 @@ namespace C3
                     case "MOTI": role.Animations.Add(C3MotionLoader.Load(br)); break;
                     case "PTCL": role.Effects.Add(C3ParticleLoader.Load(br)); break;
                     case "CAME": role.Cameras.Add(C3CameraLoader.Load(br)); break;
+                    case "SHAP": role.Shapes.Add(C3ShapeLoader.Load(br)); break;
+                    case "SMOT": role.ShapeMotions.Add(C3ShapeMotionLoader.Load(br)); break;
                     default:
                         if(verbose)
                             Console.WriteLine($"[C3ModelLoader] Unknown chunk type: {chunkHeader.Id} size: {chunkHeader.Size} PreviousType: {PreviousType}");
