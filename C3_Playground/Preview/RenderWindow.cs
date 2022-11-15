@@ -14,11 +14,17 @@ namespace C3_Playground.Preview
 
         private VertexPositionColor[] axisLines;
 
-        private BasicEffect basicEffect;
 
         private Basic3dExampleCamera camera3D;
 
+        private BasicEffect bodyEffect;
         private ModelRenderer myModels;
+        private BasicEffect weaponLEffect;
+        private ModelRenderer weaponLModels;
+        private BasicEffect weaponREffect;
+        private ModelRenderer weaponRModels;
+        private BasicEffect mountEffect;
+        private ModelRenderer mountModels;
 
         Matrix viewMatrix;
         Matrix projectionMatrix;
@@ -55,15 +61,26 @@ namespace C3_Playground.Preview
             camera3D.TargetPositionToLookAt = new Vector3(0, 0, 0);
             camera3D.Position = new Vector3(100, 0, 0);
 
-            basicEffect = new BasicEffect(GraphicsDevice);
-            basicEffect.World = Matrix.Identity;
-            //basicEffect.VertexColorEnabled = true;
-            basicEffect.TextureEnabled = true;
+            bodyEffect = new BasicEffect(GraphicsDevice);
+            bodyEffect.World = Matrix.Identity;
+            bodyEffect.TextureEnabled = true;
+            
+            weaponLEffect = new BasicEffect(GraphicsDevice);
+            weaponLEffect.World = Matrix.Identity;
+            weaponLEffect.TextureEnabled = true;
+            
+            weaponREffect = new BasicEffect(GraphicsDevice);
+            weaponREffect.World = Matrix.Identity;
+            weaponREffect.TextureEnabled = true;
+
+            mountEffect = new BasicEffect(GraphicsDevice);
+            mountEffect.World = Matrix.Identity;
+            mountEffect.TextureEnabled = true;
 
 
             //Camera Setup
             Vector3 cameraPosition = new Vector3(200f, 200f, 0f);
-            Vector3 cameraTarget = new Vector3(0, 0, 0);
+            Vector3 cameraTarget = new Vector3(0, 0, -150);
             //viewMatrix = Matrix.CreateLookAt(new Vector3(200, 0, 0), new Vector3(0, 200, 0), new Vector3(0, 1, 0));
             viewMatrix = Matrix.CreateLookAt(cameraTarget + new Vector3(-1, -1, -1) * cameraPosition, cameraTarget, Vector3.Forward);
             projectionMatrix = Matrix.CreateOrthographic(500, 500, 0.001f, 20000f);
@@ -75,25 +92,80 @@ namespace C3_Playground.Preview
             using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\002000000.c3" : _modelFile)))
                 model = C3ModelLoader.Load(br);
 
-            //C3Model? danceAnimation = null;
-            //string animation = @"C:\Program Files (x86)\Conquer Online\Conquer Online 3.0\c3\monster\314\100.C3";
-            //using (BinaryReader br = new BinaryReader(File.OpenRead(animation)))
-            //    danceAnimation = C3ModelLoader.Load(br);
-            //if (model != null && danceAnimation != null)
-            //{
-            //    Console.WriteLine("Replaced motion with motion file");
-            //    model.Animations = danceAnimation.Animations;
-            //}
+            C3Model? modelAnimation = null;
+            string animation = @"D:\Programming\Conquer\Clients\5579\c3\1002\000\100.C3";
+            using (BinaryReader br = new BinaryReader(File.OpenRead(animation)))
+                modelAnimation = C3ModelLoader.Load(br);
+            if (model != null && modelAnimation != null)
+            {
+                Console.WriteLine("Replaced motion with motion file");
+                model.Animations = modelAnimation.Animations;
+            }
 
             Texture2D myTexture;
             DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\texture\002000000.dds" : _textureFile, GraphicsDevice, false, out myTexture);
+            bodyEffect.Texture = myTexture;
+
+            ///Left Weapon
+            C3Model? weaponLModel = null;
+            using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410210.c3")))
+                weaponLModel = C3ModelLoader.Load(br);
+
+            Texture2D weaponLTexture;
+            DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\410216.dds", GraphicsDevice, false, out weaponLTexture);
+            weaponLEffect.Texture = weaponLTexture;
+
+
+            ///Right Weapon
+            C3Model? weaponRModel = null;
+            using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\480280.c3")))
+                weaponRModel = C3ModelLoader.Load(br);
+
+            Texture2D weaponRTexture;
+            DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\480285.dds", GraphicsDevice, false, out weaponRTexture);
+            weaponREffect.Texture = weaponRTexture;
 
 
 
-            if(model != null)
+            ///Mount
+            C3Model? mountModel = null;
+            using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5579\c3\Mount\819\8190000.C3")))
+                mountModel = C3ModelLoader.Load(br);
+
+            Texture2D mountTexture;
+            DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5579\c3\Mount\819\8190000.dds", GraphicsDevice, false, out mountTexture);
+            mountEffect.Texture = mountTexture;
+            
+            C3Model? mountAnimation = null;
+            string mountAnim = @"D:\Programming\Conquer\Clients\5579\c3\Mount\819\100.C3";
+            using (BinaryReader br = new BinaryReader(File.OpenRead(mountAnim)))
+                mountAnimation = C3ModelLoader.Load(br);
+            if (mountModel != null && mountAnimation != null)
+            {
+                Console.WriteLine("Replaced motion with motion file");
+                mountModel.Animations = mountAnimation.Animations;
+            }
+
+
+            if (model != null)
             {
                 myModels = new(model, GraphicsDevice, myTexture);
 
+            }
+            if (weaponLModel != null)
+            {
+                weaponLModels = new(weaponLModel, GraphicsDevice, weaponLTexture);
+                weaponLModels.SetParent(0, myModels.NamedParts["v_l_weapon"]);
+            }
+            if (weaponRModel != null)
+            {
+                weaponRModels = new(weaponRModel, GraphicsDevice, weaponRTexture);
+                weaponRModels.SetParent(0, myModels.NamedParts["v_r_weapon"]);
+            }
+            if (mountModel != null)
+            {
+                mountModels = new(mountModel, GraphicsDevice, mountTexture);
+                myModels.SetParentAll(mountModels.NamedParts["v_mount"]);
             }
             TargetElapsedTime = TimeSpan.FromSeconds(1f/30f);
         }
@@ -122,6 +194,9 @@ namespace C3_Playground.Preview
             #endregion 3d Model Rotation
 
             myModels.Update(gameTime);
+            weaponLModels.Update(gameTime);
+            weaponRModels.Update(gameTime);
+            mountModels.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -130,14 +205,29 @@ namespace C3_Playground.Preview
         {
             GraphicsDevice.Clear(Color.Black);
 
-            basicEffect.World = Matrix.Identity;
-            basicEffect.View = viewMatrix;
-            basicEffect.Projection = projectionMatrix;
+            bodyEffect.World = Matrix.Identity;
+            bodyEffect.View = viewMatrix;
+            bodyEffect.Projection = projectionMatrix;
+
+            weaponLEffect.World = Matrix.Identity;
+            weaponLEffect.View = viewMatrix;
+            weaponLEffect.Projection = projectionMatrix;
+
+            weaponREffect.World = Matrix.Identity;
+            weaponREffect.View = viewMatrix;
+            weaponREffect.Projection = projectionMatrix;
+
+            mountEffect.World = Matrix.Identity;
+            mountEffect.View = viewMatrix;
+            mountEffect.Projection = projectionMatrix;
 
             //GraphicsDevice.SetVertexBuffer(vertexBuffer);
             //GraphicsDevice.Indices = indexBuffer;
 
-            myModels.Draw(gameTime, basicEffect);
+            myModels.Draw(gameTime, bodyEffect);
+            weaponLModels.Draw(gameTime, weaponLEffect);
+            weaponRModels.Draw(gameTime, weaponREffect);
+            mountModels.Draw(gameTime, mountEffect);
 
             //basicEffect.VertexColorEnabled = true;
 

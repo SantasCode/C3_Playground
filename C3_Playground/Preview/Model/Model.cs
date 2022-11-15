@@ -47,18 +47,13 @@ namespace C3_Playground.Preview.Model
                     model.Draw(gameTime, basicEffect);
         }
 
-        private Matrix GetMatrix(string PartName)
+        public void SetParent(int partIndex, Model model) => NamedParts.ElementAt(partIndex).Value.Parent = model;
+        public void SetParent(string partName, Model model) => NamedParts[partName].Parent = model;
+        public void SetParentAll(Model model)
         {
-            if (!isBody) return Matrix.Identity;
-
-            if (NamedParts.TryGetValue(PartName, out Model model))
-                return model.GetTransform(0);
-
-            return Matrix.Identity;
+            foreach(var part in NamedParts.Values)
+                part.Parent = model;
         }
-        public Matrix GetLWeapon() => GetMatrix("v_l_weapon");
-        public Matrix GetRWeapon() => GetMatrix("v_r_weapon");
-        public Matrix GetArmet() => GetMatrix("v_armet");
     }
 
     internal class Model
@@ -92,6 +87,8 @@ namespace C3_Playground.Preview.Model
         public Motion? ActiveMotion { get; set; }
 
         public Texture2D Texture { get; set; }
+
+        public Model? Parent { get; set; }
 
 
         public Model(C3Phy c3Phy, C3Motion c3Motion, GraphicsDevice graphicsDevice, Texture2D texture)
@@ -145,7 +142,7 @@ namespace C3_Playground.Preview.Model
                             {
                                 TextureCoordinate = new Vector2(_c3Phy.Vertices[vertexIdx.Item1].U, _c3Phy.Vertices[vertexIdx.Item1].V),
                                 Position = CalculateVertex(new Vector3(_c3Phy.Vertices[vertexIdx.Item1].Position.X, _c3Phy.Vertices[vertexIdx.Item1].Position.Y, _c3Phy.Vertices[vertexIdx.Item1].Position.Z),
-                                    BaseMotion.GetMatrix(bone.Key),
+                                    GetTransform(bone.Key),
                                     vertexIdx.Item2)
                             };
                         }
@@ -170,13 +167,16 @@ namespace C3_Playground.Preview.Model
         public Vector3 CalculateVertex(Vector3 vertex, Matrix transform, float weight)
         {
             //It appears that the weight does not have an effect...not used in the eu client. Renders incorrectly when using weight.
+
+            //Need to get the parents parent transform, if it exists. Etc.
             var result = Vector3.Transform(vertex, transform); //Matrix.Multiply(transform, weight));
             return result;
         }
 
         public Matrix GetTransform(uint BoneIndex)
         {
-            return BaseMotion.GetMatrix(BoneIndex);
+            Matrix parentTransform = Parent?.GetTransform(0) ?? Matrix.Identity;
+            return Matrix.Multiply(BaseMotion.GetMatrix(BoneIndex), parentTransform);
         }
     }
 }
