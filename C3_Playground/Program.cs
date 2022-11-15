@@ -72,24 +72,16 @@ namespace C3_Playground
             Console.WriteLine($"Cameras: {myModel.Cameras.Count} Effects: {myModel.Effects.Count}");
 
             if (myModel.Meshs.Count == myModel.Animations.Count)
-            {
                 Console.WriteLine($"Equal parts of each.");
-                for(int i = 0; i < myModel.Meshs.Count; i++)
-                {
-                    Console.WriteLine($"-->{myModel.Meshs[i].Name}, Bone Count: {myModel.Animations[i].BoneCount}");
-                }
 
-            }
-
-            Console.WriteLine($"");
-
-            Console.WriteLine($"Mesh:");
-            if (myModel != null)
+            for(int i = 0; i < myModel.Meshs.Count; i++)
             {
-                foreach (var mesh in myModel.Meshs)
-                    Console.WriteLine($"-->{mesh.Name}");
+                Console.WriteLine($"PHY-->{myModel.Meshs[i].Name}, Bone Count: {myModel.Animations[i].BoneCount}");
             }
-
+            for (int i = 0; i < myModel.Animations.Count; i++)
+            {
+                Console.WriteLine($"MOTI-->Index: {i} Bone Count: {myModel.Animations[i].BoneCount}");
+            }
         }
         [Command("test-meshes")]
         public void C3_TestLoadMeshes([Argument][DirectoryExists] string fileDir, [Option('v')] bool verbose = false)

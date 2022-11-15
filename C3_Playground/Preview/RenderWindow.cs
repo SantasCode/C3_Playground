@@ -65,18 +65,28 @@ namespace C3_Playground.Preview
             Vector3 cameraPosition = new Vector3(200f, 200f, 0f);
             Vector3 cameraTarget = new Vector3(0, 0, 0);
             //viewMatrix = Matrix.CreateLookAt(new Vector3(200, 0, 0), new Vector3(0, 200, 0), new Vector3(0, 1, 0));
-            viewMatrix = Matrix.CreateLookAt(cameraTarget + new Vector3(1, 1, -1) * cameraPosition, cameraTarget, Vector3.Up);
+            viewMatrix = Matrix.CreateLookAt(cameraTarget + new Vector3(-1, -1, -1) * cameraPosition, cameraTarget, Vector3.Forward);
             projectionMatrix = Matrix.CreateOrthographic(500, 500, 0.001f, 20000f);
 
 
             
             //Load a Mesh.
             C3Model? model = null;
-            using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\002000000.C3" : _modelFile)))
+            using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\002132000.C3" : _modelFile)))
                 model = C3ModelLoader.Load(br);
 
+            //C3Model? danceAnimation = null;
+            //string animation = @"D:\Programming\Conquer\Clients\5165\c3\1002\000\100.C3";
+            //using (BinaryReader br = new BinaryReader(File.OpenRead(animation)))
+            //    danceAnimation = C3ModelLoader.Load(br);
+            //if (model != null && danceAnimation != null)
+            //{
+            //    Console.WriteLine("Replaced motion with motion file");
+            //    model.Animations = danceAnimation.Animations;
+            //}
+
             Texture2D myTexture;
-            DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\texture\002000000.dds" : _textureFile, GraphicsDevice, false, out myTexture);
+            DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\texture\002132300.dds" : _textureFile, GraphicsDevice, false, out myTexture);
 
 
 
@@ -85,7 +95,7 @@ namespace C3_Playground.Preview
                 myModels = new(model, GraphicsDevice, myTexture);
 
             }
-
+            TargetElapsedTime = TimeSpan.FromSeconds(1f/30f);
         }
 
         protected override void Update(GameTime gameTime)

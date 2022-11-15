@@ -20,7 +20,10 @@ namespace C3_Playground.Preview.Model
             if (c3Model.Meshs.Count != c3Model.Animations.Count) throw new Exception("Number of meshes does not match the number of motions");
 
             for (int i = 0; i < c3Model.Meshs.Count; i++)
-                Models.Add(new Model(c3Model.Meshs[i], c3Model.Animations[i], _graphicsDevice, texture));
+            {
+                if (c3Model.Animations[i].BoneCount > 1)
+                    Models.Add(new Model(c3Model.Meshs[i], c3Model.Animations[i], _graphicsDevice, texture));
+            }
         }
         public void Update(GameTime gameTime)
         {
@@ -103,6 +106,7 @@ namespace C3_Playground.Preview.Model
 
             //Going to update Frame each call, going to be way to fast.
             bool changed = BaseMotion.NextFrame();
+
 
             if (changed)
             {
