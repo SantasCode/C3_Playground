@@ -1,8 +1,10 @@
 ﻿using C3;
 using C3.Exports;
+using C3.IniFiles;
 using C3_Playground.CommandAttributes;
 using C3_Playground.Preview.Model;
 using Cocona;
+using System.Text;
 using System.Text.Json;
 
 namespace C3_Playground
@@ -130,7 +132,12 @@ namespace C3_Playground
             //    weaponInfo = C3.IniFiles.Loaders.RolePartInfoLoader.Load(tr);
             //using (TextReader tr = new StreamReader(Path.Combine(clientDirectory, "ini/mount.ini")))
             //    mountInfo = C3.IniFiles.Loaders.RolePartInfoLoader.Load(tr);
-
+            //C3.IniFiles.Loaders.ItemLoader.Load(@"S:\Programming\CO Dev\Clients\5165");
+            Dictionary<string, uint> result = new();
+            Span<byte> byteContents = File.ReadAllBytes(@"S:\Programming\CO Dev\Clients\5165\ini\monster.dat");
+            COEncryptedFile file = new();
+            file.Decrypt(byteContents);
+            File.WriteAllText(@"C:\Temp\monster.txt", Encoding.ASCII.GetString(byteContents));
         }
 
         [Command("export-obj")]

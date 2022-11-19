@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,8 +18,16 @@ namespace C3.IniFiles.Entities
     public class Item
     {
         public string Name { get; set; }
-        public string Mesh { get; set; }
-        public string Texture { get; set; }
-        public string Type { get; set; }
+        public ItemType Type { get; set; }
+        public Dictionary<uint, (string, string)> Models { get; set; } = new();
+
+        public (string, string)? Get(uint BodyType)
+        {
+            if (Models.ContainsKey(BodyType))
+            {
+                return (Models[BodyType]);
+            }
+            return null;
+        }
     }
 }
