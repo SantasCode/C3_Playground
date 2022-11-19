@@ -99,7 +99,7 @@ namespace C3_Playground.Preview
             //CullClockwise draws the model "mirrored" correctly but looks screwed up.
             //GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;
 
-            if (false) //Load a character w/ weapons and mount.
+            if (true) //Load a character w/ weapons and mount.
             {
                 //Load a Mesh.
                 using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\002000000.c3" : _modelFile)))
@@ -145,9 +145,9 @@ namespace C3_Playground.Preview
                     mountModel.Animations = mountAnimation.Animations;
                 }
             }
-            else if (true) // Load effeect.
+            else if (true) // Load effect w/o SHAP/SMOT
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5579\c3\effect\arrow\500009\1.C3" : _modelFile)))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\effect\LuckyGuy\2.C3")))
                     model = C3ModelLoader.Load(br, true);
 
                 //string animation = @"D:\Programming\Conquer\Clients\5579\c3\1002\000\100.C3";
@@ -159,7 +159,7 @@ namespace C3_Playground.Preview
                 //    model.Animations = modelAnimation.Animations;
                 //}
 
-                DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5579\c3\effect\AncientCity\1.dds" : _textureFile, GraphicsDevice, false, out modelTexture);
+                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\effect\LuckyGuy\2.dds", GraphicsDevice, false, out modelTexture);
                 bodyEffect.Texture = modelTexture;
             }
 
@@ -189,6 +189,8 @@ namespace C3_Playground.Preview
                 myModels.SetParentAll(mountModels.NamedParts["v_mount"]);
             }
             TargetElapsedTime = TimeSpan.FromSeconds(1f/30f);
+
+            GraphicsDevice.BlendState = BlendState.NonPremultiplied;
         }
 
         protected override void Update(GameTime gameTime)

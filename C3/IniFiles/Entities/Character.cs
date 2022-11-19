@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace C3.IniFiles.Entities
 {
-    internal class C3DRoleData
+    internal class Character
     {
     }
 }

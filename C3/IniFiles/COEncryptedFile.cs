@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace C3.IniFiles.Entities
+namespace C3.IniFiles
 {
-    internal class SimpleModel
+    internal class COEncryptedFile
     {
     }
 }
