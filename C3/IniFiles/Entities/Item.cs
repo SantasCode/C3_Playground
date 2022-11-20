@@ -21,7 +21,7 @@ namespace C3.IniFiles.Entities
         public ItemType Type { get; set; }
         public Dictionary<uint, (string, string)> Models { get; set; } = new();
 
-        public (string, string)? Get(uint BodyType)
+        public (string, string)? Get(uint BodyType = 0)
         {
             if (Models.ContainsKey(BodyType))
             {

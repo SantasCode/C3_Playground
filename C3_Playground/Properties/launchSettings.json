@@ -22,7 +22,7 @@
     },
     "test-ini": {
       "commandName": "Project",
-      "commandLineArgs": "test-ini \"S:\\Programming\\CO Dev\\Clients\\5165\""
+      "commandLineArgs": "test-ini \"D:\\Programming\\Conquer\\Clients\\5165\""
     },
     "test-meshes": {
       "commandName": "Project",

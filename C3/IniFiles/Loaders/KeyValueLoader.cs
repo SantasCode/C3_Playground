@@ -10,9 +10,9 @@ namespace C3.IniFiles.Loaders
 {
     internal class KeyValueLoader
     {
-        internal static Dictionary<uint, string> Load(TextReader tr)
+        internal static Dictionary<ulong, string> Load(TextReader tr)
         {
-            Dictionary<uint, string> result = new();
+            Dictionary<ulong, string> result = new();
 
             string? line = null;
             while ((line = tr.ReadLine()) != null)
@@ -20,7 +20,7 @@ namespace C3.IniFiles.Loaders
                 string[] parts = line.Split("=");
                 if(parts.Count() != 2)
                     continue;
-                result.Add(uint.Parse(parts[0]), parts[1]);
+                result.Add(ulong.Parse(parts[0]), parts[1]);
             }
 
             return result;
