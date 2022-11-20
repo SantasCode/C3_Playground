@@ -11,6 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\glTFLoader\glTFLoader.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="MonsterLookface.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
