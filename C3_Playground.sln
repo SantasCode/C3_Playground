@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "C3_Playground", "C3_Playgro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "C3", "C3\C3.csproj", "{44D9928A-EC4C-414C-A30D-359326A38E0F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "glTFLoader", "glTFLoader\glTFLoader.csproj", "{B3A9EA1C-7DD5-429D-96E6-A398A3E3A030}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{44D9928A-EC4C-414C-A30D-359326A38E0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44D9928A-EC4C-414C-A30D-359326A38E0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44D9928A-EC4C-414C-A30D-359326A38E0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3A9EA1C-7DD5-429D-96E6-A398A3E3A030}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3A9EA1C-7DD5-429D-96E6-A398A3E3A030}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3A9EA1C-7DD5-429D-96E6-A398A3E3A030}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3A9EA1C-7DD5-429D-96E6-A398A3E3A030}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
