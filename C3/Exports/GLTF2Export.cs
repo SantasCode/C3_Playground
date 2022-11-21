@@ -211,7 +211,7 @@ namespace C3.Exports
             gltfModel.Scenes[0] = scene;
 
             gltfModel.Asset = new()
-            {
+    {
                 Generator = "C3glTF",
                 Version = "2.0"
             };
