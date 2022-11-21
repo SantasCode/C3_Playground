@@ -25,6 +25,8 @@ namespace C3_Playground.Preview
         private ModelRenderer weaponRModels;
         private BasicEffect mountEffect;
         private ModelRenderer mountModels;
+        private BasicEffect armetEffect;
+        private ModelRenderer armetModels;
 
         Matrix viewMatrix;
         Matrix projectionMatrix;
@@ -77,6 +79,10 @@ namespace C3_Playground.Preview
             mountEffect.World = Matrix.Identity;
             mountEffect.TextureEnabled = true;
 
+            armetEffect = new BasicEffect(GraphicsDevice);
+            armetEffect.World = Matrix.Identity;
+            armetEffect.TextureEnabled = true;
+
 
             //Camera Setup
             Vector3 cameraPosition = new Vector3(200f, 200f, 0f);
@@ -95,10 +101,14 @@ namespace C3_Playground.Preview
             C3Model? mountModel = null;
             Texture2D? mountTexture = null;
             C3Model? mountAnimation = null;
+            
+            C3Model? armetModel = null;
+            Texture2D? armetTexture = null;
 
             //CullClockwise draws the model "mirrored" correctly but looks screwed up.
-            GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;
-            if (true)
+            //GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;
+
+            if (false)
             {
                 using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410280.c3")))
                     model = C3ModelLoader.Load(br);
@@ -124,18 +134,31 @@ namespace C3_Playground.Preview
                 DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\texture\002000000.dds" : _textureFile, GraphicsDevice, false, out modelTexture);
                 bodyEffect.Texture = modelTexture;
 
+
+                ///Armet
+                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\hair\002119044.C3")))
+                    armetModel = C3ModelLoader.Load(br);
+
+                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\hair\002119544.dds", GraphicsDevice, false, out armetTexture);
+                armetEffect.Texture = armetTexture;
+
+
                 ///Left Weapon
                 using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410080.c3")))
                     weaponLModel = C3ModelLoader.Load(br);
 
                 DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\410086.dds", GraphicsDevice, false, out weaponLTexture);
                 weaponLEffect.Texture = weaponLTexture;
+
+
                 // Right Weapon
                 using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\420010.c3")))
                     weaponRModel = C3ModelLoader.Load(br);
 
                 DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\420015.dds", GraphicsDevice, false, out weaponRTexture);
                 weaponREffect.Texture = weaponRTexture;
+
+
                 ///Mount
                 using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5579\c3\Mount\819\8190000.C3")))
                     mountModel = C3ModelLoader.Load(br);
@@ -179,6 +202,11 @@ namespace C3_Playground.Preview
             {
                 myModels = new(model, GraphicsDevice, modelTexture);
 
+            }
+            if(armetModel != null && armetTexture != null)
+            {
+                armetModels = new ModelRenderer(armetModel, GraphicsDevice, armetTexture);
+                armetModels.SetParent(0, myModels.NamedParts["v_armet"]);
             }
             if (weaponLModel != null && weaponLTexture != null)
             {
@@ -224,6 +252,7 @@ namespace C3_Playground.Preview
             #endregion 3d Model Rotation
 
             myModels?.Update(gameTime);
+            armetModels?.Update(gameTime);
             weaponLModels?.Update(gameTime);
             weaponRModels?.Update(gameTime);
             mountModels?.Update(gameTime);
@@ -251,13 +280,18 @@ namespace C3_Playground.Preview
             mountEffect.View = viewMatrix;
             mountEffect.Projection = projectionMatrix;
 
+            armetEffect.World = Matrix.Identity;
+            armetEffect.View = viewMatrix;
+            armetEffect.Projection = projectionMatrix;
+
             //GraphicsDevice.SetVertexBuffer(vertexBuffer);
             //GraphicsDevice.Indices = indexBuffer;
 
+            mountModels?.Draw(gameTime, mountEffect);
             myModels?.Draw(gameTime, bodyEffect);
+            armetModels?.Draw(gameTime, armetEffect);
             weaponLModels?.Draw(gameTime, weaponLEffect);
             weaponRModels?.Draw(gameTime, weaponREffect);
-            mountModels?.Draw(gameTime, mountEffect);
 
             //basicEffect.VertexColorEnabled = true;
 
