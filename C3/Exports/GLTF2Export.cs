@@ -48,15 +48,17 @@ namespace C3.Exports
             glTFLoader.Schema.Buffer indicesBuffer = new();
             indicesBuffer.ByteLength = indicesBuffView.ByteLength;
             indicesBuffer.Name = "Indices Buffer";
-            ReadOnlySpan<byte> indicesByteSpan = MemoryMarshal.Cast<ushort, byte>(new ReadOnlySpan<ushort>(c3mesh.Indices));
+            ReadOnlySpan<byte> indicesByteSpan = MemoryMarshal.Cast<ushort, byte>(new ReadOnlySpan<ushort>(c3mesh.Indices.Reverse().ToArray()));
             indicesBuffer.Uri = "data:application/gltf-buffer;base64," + Convert.ToBase64String(indicesByteSpan);
             #endregion Indices
 
             #region Vertices
 
             //Find bounding box.
-            Vector3 max = Vector3.Zero;
-            Vector3 min = Vector3.Zero;
+            Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+            Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            Vector2 maxUV = new Vector2(float.MinValue, float.MinValue);
+            Vector2 minUV = new Vector2(float.MaxValue, float.MaxValue);
 
             foreach (var phyVertex in c3mesh.Vertices)
             {
@@ -68,6 +70,12 @@ namespace C3.Exports
                 if (vertex.X < min.X) min.X = vertex.X;
                 if (vertex.Y < min.Y) min.Y = vertex.Y;
                 if (vertex.Z < min.Z) min.Z = vertex.Z;
+
+                if (phyVertex.U > maxUV.X) maxUV.X = phyVertex.U;
+                if (phyVertex.V > maxUV.Y) maxUV.Y = phyVertex.V;
+                
+                if (phyVertex.U < minUV.X) minUV.X = phyVertex.U;
+                if (phyVertex.V < minUV.Y) minUV.Y = phyVertex.V;
             }
 
             Accessor verticesAccessor = new();
@@ -85,28 +93,39 @@ namespace C3.Exports
             verticesAccessor.Max[1] = max.Y;
             verticesAccessor.Max[2] = max.Z;
 
+            Accessor uvAccessor = new();
+            uvAccessor.BufferView = 1;
+            uvAccessor.ByteOffset = sizeof(float) * 3;//Offset for 1x Vector3
+            uvAccessor.ComponentType = Accessor.ComponentTypeEnum.FLOAT;
+            uvAccessor.Count = c3mesh.Vertices.Length;
+            uvAccessor.Type = Accessor.TypeEnum.VEC2;
+            uvAccessor.Min = new float[2];
+            uvAccessor.Min[0] = minUV.X;
+            uvAccessor.Min[1] = minUV.Y;
+            uvAccessor.Max = new float[2];
+            uvAccessor.Max[0] = maxUV.X;
+            uvAccessor.Max[1] = maxUV.Y;
+
             BufferView verticesBuffView = new();
             verticesBuffView.Buffer = 1;
             verticesBuffView.ByteOffset = 0;
-            verticesBuffView.ByteLength = c3mesh.Vertices.Length * sizeof(float) * 3; //3 floats per Vector3.
+            verticesBuffView.ByteLength = c3mesh.Vertices.Length * sizeof(float) * 5; //3 floats per Vector3 + Vector2.
             verticesBuffView.Target = BufferView.TargetEnum.ARRAY_BUFFER;
+            verticesBuffView.ByteStride = sizeof(float) * 5; // 1x Vector3 + 1x Vector2;
 
             glTFLoader.Schema.Buffer verticesBuffer = new();
             verticesBuffer.ByteLength = verticesBuffView.ByteLength;
             verticesBuffer.Name = "Vertices Buffer";
-            Span<float> c3vertices = new(new float[c3mesh.Vertices.Length * 3]);
-            Span<float> c3UV = new(new float[c3mesh.Vertices.Length * 2]);
+            Span<float> c3vertices = new(new float[c3mesh.Vertices.Length * 5]);
             int idx = 0;
-            int uvIdx = 0;
             foreach(var phyVertex in c3mesh.Vertices)
             {
                 c3vertices[idx] = phyVertex.Position.X;
                 c3vertices[idx + 1] = phyVertex.Position.Y;
                 c3vertices[idx + 2] = phyVertex.Position.Z;
-                idx += 3;
-                c3UV[uvIdx] = phyVertex.U;
-                c3UV[uvIdx + 1] = phyVertex.V;
-                uvIdx += 2;
+                c3vertices[idx + 3] = phyVertex.U;
+                c3vertices[idx + 4] = phyVertex.V;
+                idx += 5;
             }
 
             ReadOnlySpan<byte> verticesByteSpan = MemoryMarshal.Cast<float, byte>(c3vertices);
@@ -114,15 +133,44 @@ namespace C3.Exports
             #endregion Vertices
 
             #region Texture
+            Image image = new();
+            byte[] imBytes = File.ReadAllBytes(@"C:\Temp\Conquer\410285.png");
+            image.Uri = "data:image/png;base64," + Convert.ToBase64String(imBytes);
+            image.Name = "Texture Image";
 
+            gltfModel.Images = new Image[1];
+            gltfModel.Images[0] = image;
+
+            Texture texture = new();
+            texture.Name = "Texture";
+            texture.Source = 0; //Image index.
+
+            gltfModel.Textures = new Texture[1];
+            gltfModel.Textures[0] = texture;
+
+            Material material = new();
+            //material.DoubleSided = true;
+            material.PbrMetallicRoughness = new()
+            {
+                BaseColorTexture = new()
+                {
+                    Index = 0
+                },
+                MetallicFactor = 0,
+                RoughnessFactor = 1
+            };
+
+            gltfModel.Materials = new Material[1];
+            gltfModel.Materials[0] = material;
             #endregion Texture
 
 
 
 
-            gltfModel.Accessors = new Accessor[2];
+            gltfModel.Accessors = new Accessor[3];
             gltfModel.Accessors[0] = indicesAccessor;
             gltfModel.Accessors[1] = verticesAccessor;
+            gltfModel.Accessors[2] = uvAccessor;
 
             gltfModel.BufferViews = new BufferView[2];
             gltfModel.BufferViews[0] = indicesBuffView;
@@ -133,9 +181,11 @@ namespace C3.Exports
             gltfModel.Buffers[1] = verticesBuffer;
 
             MeshPrimitive primitive = new();
+            primitive.Material = 0;
             primitive.Indices = 0; //Index to indices accessor
             primitive.Attributes = new();
             primitive.Attributes.Add("POSITION", 1);//Index to vertices accessor
+            primitive.Attributes.Add("TEXCOORD_0", 2);
 
             Mesh mesh = new();
             mesh.Primitives = new MeshPrimitive[1];

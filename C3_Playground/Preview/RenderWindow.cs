@@ -97,13 +97,13 @@ namespace C3_Playground.Preview
             C3Model? mountAnimation = null;
 
             //CullClockwise draws the model "mirrored" correctly but looks screwed up.
-            //GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;
+            GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;
             if (true)
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410080.c3")))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410280.c3")))
                     model = C3ModelLoader.Load(br);
 
-                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\410086.dds", GraphicsDevice, false, out modelTexture);
+                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\410285.dds", GraphicsDevice, false, out modelTexture);
                 bodyEffect.Texture = modelTexture;
             }
             else if (true) //Load a character w/ weapons and mount.
