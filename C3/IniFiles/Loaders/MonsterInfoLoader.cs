@@ -1,4 +1,6 @@
-﻿namespace C3.IniFiles.Loaders
+﻿using C3.IniFiles.FileSet;
+
+namespace C3.IniFiles.Loaders
 {
     internal static class MonsterInfoLoader
     {

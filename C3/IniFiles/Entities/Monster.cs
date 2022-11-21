@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace C3.IniFiles.Entities
 {
-    internal class Monster
+    public class Monster
     {
+        public string Name { get; set; }
+        public List<(string, string)> BaseModel { get; set; } = new();
+        public Dictionary<string, string> Motion { get; set; } = new();
     }
 }

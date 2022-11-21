@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IniParser;
-using IniParser.Model;
+﻿using IniParser;
+using C3.IniFiles.FileSet;
 
 namespace C3.IniFiles.Loaders
 {
     internal static class RolePartInfoLoader
     {
-        internal static Dictionary<uint, RolePartInfo> Load(TextReader tr)
+        internal static Dictionary<ulong, RolePartInfo> Load(TextReader tr, bool LoadBlend = false)
         {
-            Dictionary<uint, RolePartInfo> result = new();
+            Dictionary<ulong, RolePartInfo> result = new();
 
             IniDataParser parser = new IniDataParser();
             IniData data = parser.Parse(tr);
@@ -21,7 +16,7 @@ namespace C3.IniFiles.Loaders
             {
                 RolePartInfo rolePartInfo = new RolePartInfo();
 
-                uint Id = uint.Parse(dataPiece.Name);
+                ulong Id = ulong.Parse(dataPiece.Name);
 
                 rolePartInfo.PartCount = uint.Parse(dataPiece.Properties["Part"]);
                 
@@ -29,8 +24,8 @@ namespace C3.IniFiles.Loaders
                 {
                     rolePartInfo.Parts.Add(new()
                     {
-                        MeshId = uint.Parse(dataPiece.Properties[$"Mesh{i}"]),
-                        TextureId = uint.Parse(dataPiece.Properties[$"Texture{i}"])
+                        MeshId = ulong.Parse(dataPiece.Properties[$"Mesh{i}"]),
+                        TextureId = ulong.Parse(dataPiece.Properties[$"Texture{i}"]),
                     });
                 }
                 result.Add(Id, rolePartInfo);

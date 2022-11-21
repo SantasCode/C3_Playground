@@ -5,7 +5,7 @@ using System.Net.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace C3.IniFiles
+namespace C3.IniFiles.FileSet
 {
     internal class RolePartInfo
     {
@@ -15,14 +15,14 @@ namespace C3.IniFiles
 
     internal class RolePartSubInfo
     {
-        public uint MeshId;
-        public uint TextureId;
+        public ulong MeshId { get; set; }
+        public ulong TextureId { get; set; }
+        public uint Asb { get; set; }   
+        public uint Adb { get; set; }
 
         ///These properties always have default values. Excluding for clarity.
         //public uint MixTex;
         //public uint MixOpt;
-        //public uint Asb;
-        //public uint Adb;
         //public string Material;
     }
 }

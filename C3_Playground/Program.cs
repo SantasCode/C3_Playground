@@ -1,8 +1,11 @@
 ﻿using C3;
 using C3.Exports;
+using C3.IniFiles.FileSet;
 using C3_Playground.CommandAttributes;
 using C3_Playground.Preview.Model;
 using Cocona;
+using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 
 namespace C3_Playground
@@ -117,20 +120,29 @@ namespace C3_Playground
         [Command("test-ini")]
         public void Ini_LoadTest([Argument][DirectoryExists] string clientDirectory)
         {
-            //Dictionary<uint, RolePartInfo> armetInfo = new();
-            //Dictionary<uint, RolePartInfo> armorInfo = new();
-            //Dictionary<uint, RolePartInfo> weaponInfo = new();
-            //Dictionary<uint, RolePartInfo> mountInfo = new();
+            GameData game = new GameData(clientDirectory);
+            var items = game.GetItems();
 
-            //using (TextReader tr = new StreamReader(Path.Combine(clientDirectory, "ini/armet.ini")))
-            //    armetInfo = C3.IniFiles.Loaders.RolePartInfoLoader.Load(tr);
-            //using (TextReader tr = new StreamReader(Path.Combine(clientDirectory, "ini/armor.ini")))
-            //    armorInfo = C3.IniFiles.Loaders.RolePartInfoLoader.Load(tr);
-            //using (TextReader tr = new StreamReader(Path.Combine(clientDirectory, "ini/weapon.ini")))
-            //    weaponInfo = C3.IniFiles.Loaders.RolePartInfoLoader.Load(tr);
-            //using (TextReader tr = new StreamReader(Path.Combine(clientDirectory, "ini/mount.ini")))
-            //    mountInfo = C3.IniFiles.Loaders.RolePartInfoLoader.Load(tr);
+            foreach (var item in items)
+            {
+                if (item.Type == C3.IniFiles.Entities.ItemType.Armor) continue;
+                if (item.Type == C3.IniFiles.Entities.ItemType.Helmet) continue;
 
+                foreach (var model in item.BaseModel)
+                {
+                    C3Model? mesh = null;
+                    using (BinaryReader br = new BinaryReader(File.OpenRead(Path.Combine(clientDirectory, model.Value.Item1))))
+                        mesh = C3ModelLoader.Load(br, false);
+
+                    if (mesh == null) continue;
+
+                    if (mesh.Meshs.Count > 1) 
+                        Console.WriteLine($"Item ({item.Name}/{model.Value.Item1}) has more than 1 mesh");
+                    
+
+
+                }
+            }
         }
 
         [Command("export-obj")]
