@@ -13,19 +13,20 @@ namespace C3.IniFiles.Entities
         TwoHander,
         Shield,
         Armor,
-        Helmet
+        Helmet,
+        Other
     }
     public class Item
     {
         public string Name { get; set; }
         public ItemType Type { get; set; }
-        public Dictionary<uint, (string, string)> Models { get; set; } = new();
+        public Dictionary<uint, (string, string)> BaseModel { get; set; } = new();
 
         public (string, string)? Get(uint BodyType = 0)
         {
-            if (Models.ContainsKey(BodyType))
+            if (BaseModel.ContainsKey(BodyType))
             {
-                return (Models[BodyType]);
+                return (BaseModel[BodyType]);
             }
             return null;
         }

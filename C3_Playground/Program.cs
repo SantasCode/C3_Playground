@@ -120,7 +120,29 @@ namespace C3_Playground
         [Command("test-ini")]
         public void Ini_LoadTest([Argument][DirectoryExists] string clientDirectory)
         {
-            FileSet fileSet = new(clientDirectory);
+            GameData game = new GameData(clientDirectory);
+            var items = game.GetItems();
+
+            foreach (var item in items)
+            {
+                if (item.Type == C3.IniFiles.Entities.ItemType.Armor) continue;
+                if (item.Type == C3.IniFiles.Entities.ItemType.Helmet) continue;
+
+                foreach (var model in item.BaseModel)
+                {
+                    C3Model? mesh = null;
+                    using (BinaryReader br = new BinaryReader(File.OpenRead(Path.Combine(clientDirectory, model.Value.Item1))))
+                        mesh = C3ModelLoader.Load(br, false);
+
+                    if (mesh == null) continue;
+
+                    if (mesh.Meshs.Count > 1) 
+                        Console.WriteLine($"Item ({item.Name}/{model.Value.Item1}) has more than 1 mesh");
+                    
+
+
+                }
+            }
         }
 
         [Command("export-obj")]

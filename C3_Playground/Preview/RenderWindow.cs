@@ -98,8 +98,15 @@ namespace C3_Playground.Preview
 
             //CullClockwise draws the model "mirrored" correctly but looks screwed up.
             //GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;
+            if (true)
+            {
+                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410080.c3")))
+                    model = C3ModelLoader.Load(br);
 
-            if (true) //Load a character w/ weapons and mount.
+                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\410086.dds", GraphicsDevice, false, out modelTexture);
+                bodyEffect.Texture = modelTexture;
+            }
+            else if (true) //Load a character w/ weapons and mount.
             {
                 //Load a Mesh.
                 using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\002000000.c3" : _modelFile)))
@@ -118,16 +125,16 @@ namespace C3_Playground.Preview
                 bodyEffect.Texture = modelTexture;
 
                 ///Left Weapon
-                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410210.c3")))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410080.c3")))
                     weaponLModel = C3ModelLoader.Load(br);
 
-                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\410216.dds", GraphicsDevice, false, out weaponLTexture);
+                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\410086.dds", GraphicsDevice, false, out weaponLTexture);
                 weaponLEffect.Texture = weaponLTexture;
                 // Right Weapon
-                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\480280.c3")))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\420010.c3")))
                     weaponRModel = C3ModelLoader.Load(br);
 
-                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\480285.dds", GraphicsDevice, false, out weaponRTexture);
+                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\420015.dds", GraphicsDevice, false, out weaponRTexture);
                 weaponREffect.Texture = weaponRTexture;
                 ///Mount
                 using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5579\c3\Mount\819\8190000.C3")))

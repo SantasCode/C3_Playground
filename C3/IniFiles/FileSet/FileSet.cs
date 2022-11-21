@@ -2,7 +2,7 @@
 
 namespace C3.IniFiles.FileSet
 {
-    public class FileSet
+    internal class FileSet
     {
         private readonly string _clientPath;
 
@@ -56,7 +56,7 @@ namespace C3.IniFiles.FileSet
         private void Load3DObj()
         {
             using (TextReader tr = new StreamReader(Path.Combine(_clientPath, "ini/3dobj.ini")))
-                _3DTextures = KeyValueLoader.Load(tr);
+                _3DObjs = KeyValueLoader.Load(tr);
         }
         private void Load3DTexture()
         {
