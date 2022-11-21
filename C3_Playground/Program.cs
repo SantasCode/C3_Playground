@@ -160,6 +160,21 @@ namespace C3_Playground
                     ObjExporter.Export(model, tw);
             }
         }
+        [Command("export-gltf")]
+        public void Export_gltf([Argument][FileExists] string filePath, [Argument] string outputPath)
+        {
+            C3Model? model = null;
+            using (BinaryReader br = new BinaryReader(File.OpenRead(filePath)))
+                model = C3ModelLoader.Load(br);
+
+            if (model != null)
+            {
+                if (File.Exists(outputPath))
+                    File.Delete(outputPath);
+                using (StreamWriter tw = new StreamWriter(File.OpenWrite(outputPath)))
+                    GLTF2Export.Export(model, tw);
+            }
+        }
 
         [Command("export-json")]
         public void Export_json([Argument][FileExists] string filePath, [Argument] string outputPath)
