@@ -16,8 +16,8 @@ namespace C3.Exports.GLTF.Schema
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public required TypeEnum Type { get; set; }
-        public float[]? Max { get; set; }
-        public float[]? Min { get; set; }
+        public List<float>? Max { get; set; }
+        public List<float>? Min { get; set; }
         public string? Name { get; set; }
         public Extension? Extensions { get; set; }
         public Extra? Extras { get; set; }

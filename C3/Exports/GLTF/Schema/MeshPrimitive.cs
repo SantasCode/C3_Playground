@@ -4,6 +4,7 @@ namespace C3.Exports.GLTF.Schema
 {
     internal class MeshPrimitive
     {
+        [JsonConverter(typeof(DictionaryConverter<string, IndexedItem, IndexedItemConverter>))]
         public required Dictionary<string, IndexedItem> Attributes { get; set; }
 
         [JsonConverter(typeof(IndexedItemConverter<Accessor>))]

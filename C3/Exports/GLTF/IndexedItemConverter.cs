@@ -16,4 +16,16 @@ namespace C3.Exports.GLTF
             writer.WriteNumberValue(value.Index);
         }
     }
+    internal class IndexedItemConverter : JsonConverter<IndexedItem>
+    {
+        public override IndexedItem? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Write(Utf8JsonWriter writer, IndexedItem value, JsonSerializerOptions options)
+        {
+            writer.WriteNumberValue(value.Index);
+        }
+    }
 }

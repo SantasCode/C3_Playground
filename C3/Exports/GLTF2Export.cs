@@ -2,13 +2,12 @@
 using C3.Elements;
 using C3.Exports.GLTF;
 using C3.Exports.GLTF.Schema;
-using glTFLoader;
-//using glTFLoader.Schema;
 using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -21,35 +20,209 @@ namespace C3.Exports
     {
         public static void Export(C3Model model, StreamWriter sw)
         {
+
             JsonSerializerOptions jsonSerializerOptions = new()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 WriteIndented = true,
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             };
-            Gltf gltf = new Gltf() { Asset = new() { Version = "2.0" } };
-            gltf.Nodes = new();
 
-            Node parentNode = new()
+            C3Phy c3mesh = model.Meshs[0];
+
+            #region Indices
+            ReadOnlySpan<byte> indicesByteSpan = MemoryMarshal.Cast<ushort, byte>(new ReadOnlySpan<ushort>(c3mesh.Indices.Reverse().ToArray()));
+
+            GLTF.Schema.Buffer indicesBuffer = new()
             {
-                Children = new(),
-                Name = "Parent"
-            };
-            Node child1Node = new()
-            {
-                Name = "child1"
-            };
-            Node child2Node = new()
-            {
-                Name = "child2"
+                ByteLength = indicesByteSpan.Length,
+                Name = "Indices Bufffer",
+                Uri = "data:application/gltf-buffer;base64," + Convert.ToBase64String(indicesByteSpan)
             };
 
-            parentNode.Children.Add(child1Node);
-            parentNode.Children.Add(child2Node);
+            BufferView indicesBuffView = new()
+            {
+                Buffer = indicesBuffer,
+                ByteOffset = 0,
+                ByteLength = c3mesh.Indices.Length * sizeof(ushort),
+                Target = BufferView.TargetEnum.ELEMENT_ARRAY_BUFFER
+            };
 
-            gltf.Nodes.Add(parentNode);
-            gltf.Nodes.Add(child1Node);
-            gltf.Nodes.Add(child2Node);
+            Accessor indicesAccessor = new()
+            {
+                BufferView = indicesBuffView,
+                ComponentType = Accessor.ComponentTypeEnum.UNSIGNED_SHORT,
+                Count = c3mesh.Indices.Length,
+                Type = Accessor.TypeEnum.SCALAR,
+                //Min = new() { (float)c3mesh.Indices.Min() },
+                //Max = new() { (float)c3mesh.Indices.Max() }
+            };
+            #endregion Indices
+
+            #region Vertices
+
+            Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+            Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            Vector2 maxUV = new Vector2(float.MinValue, float.MinValue);
+            Vector2 minUV = new Vector2(float.MaxValue, float.MaxValue);
+
+            foreach (var phyVertex in c3mesh.Vertices)
+            {
+                var vertex = phyVertex.Position;
+                if (vertex.X > max.X) max.X = vertex.X;
+                if (vertex.Y > max.Y) max.Y = vertex.Y;
+                if (vertex.Z > max.Z) max.Z = vertex.Z;
+
+                if (vertex.X < min.X) min.X = vertex.X;
+                if (vertex.Y < min.Y) min.Y = vertex.Y;
+                if (vertex.Z < min.Z) min.Z = vertex.Z;
+
+                if (phyVertex.U > maxUV.X) maxUV.X = phyVertex.U;
+                if (phyVertex.V > maxUV.Y) maxUV.Y = phyVertex.V;
+
+                if (phyVertex.U < minUV.X) minUV.X = phyVertex.U;
+                if (phyVertex.V < minUV.Y) minUV.Y = phyVertex.V;
+            }
+
+            Span<float> c3vertices = new(new float[c3mesh.Vertices.Length * 5]);
+            int idx = 0;
+            foreach (var phyVertex in c3mesh.Vertices)
+            {
+                c3vertices[idx] = phyVertex.Position.X;
+                c3vertices[idx + 1] = phyVertex.Position.Y;
+                c3vertices[idx + 2] = phyVertex.Position.Z;
+                c3vertices[idx + 3] = phyVertex.U;
+                c3vertices[idx + 4] = phyVertex.V;
+                idx += 5;
+            }
+
+            ReadOnlySpan<byte> verticesByteSpan = MemoryMarshal.Cast<float, byte>(c3vertices);
+
+            GLTF.Schema.Buffer verticesBuffer = new()
+            {
+                ByteLength = verticesByteSpan.Length,
+                Name = "Vertices Buffer",
+                Uri = "data:application/gltf-buffer;base64," + Convert.ToBase64String(verticesByteSpan)
+            };
+
+            BufferView verticesBuffView = new()
+            {
+                Buffer = verticesBuffer,
+                ByteLength = c3mesh.Vertices.Length * sizeof(float) * 5, //3 floats per Vector3 + Vector2.
+                Target = BufferView.TargetEnum.ARRAY_BUFFER,
+                ByteStride = sizeof(float) * 5 // 1x Vector3 + 1x Vector2;
+            };
+
+            Accessor verticesAccessor = new()
+            {
+                BufferView = verticesBuffView,
+                ComponentType = Accessor.ComponentTypeEnum.FLOAT,
+                Count = c3mesh.Vertices.Length,
+                Type = Accessor.TypeEnum.VEC3,
+                Min = new() { min.X, min.Y, min.Z },
+                Max = new() { max.X, max.Y, max.Z }
+            };
+
+            Accessor uvAccessor = new()
+            {
+                BufferView = verticesBuffView,
+                ByteOffset = sizeof(float) * 3,//Offset for 1x Vector3
+                ComponentType = Accessor.ComponentTypeEnum.FLOAT,
+                Count = c3mesh.Vertices.Length,
+                Type = Accessor.TypeEnum.VEC2,
+                //Min = new() { minUV.X, minUV.Y },
+                //Max = new() { maxUV.X, maxUV.Y }
+            };
+            #endregion Vertices
+
+            #region Texture
+            byte[] imBytes = File.ReadAllBytes(@"C:\Temp\Conquer\410285.png");
+            Image image = new()
+            {
+                Uri = "data:image/png;base64," + Convert.ToBase64String(imBytes),
+                Name = "Texture Image"
+            };
+
+            Texture texture = new()
+            {
+                Name = "Texture",
+                Source = image
+            };
+
+            Material material = new()
+            {
+                PbrMetallicRoughness = new()
+                {
+                    BaseColorTexture = new()
+                    {
+                        Index = texture
+                    },
+                    MetallicFactor = 0
+                }
+            };
+            #endregion Texture
+
+            Mesh mesh = new()
+            {
+                Primitives = new()
+                {
+                    new()
+                    {
+                        Material = material,
+                        Indices = indicesAccessor, //Index to indices accessor
+                        Attributes = new()
+                        {
+                            { "POSITION", verticesAccessor },
+                            { "TEXCOORD_0", uvAccessor }
+                        }
+                    }
+                },
+                Name = "Base"
+            };
+
+            //Ignoring "skin" (weights/joints) for weapons.
+
+            Node primaryNode = new()
+            {
+                Mesh = mesh
+            };
+
+            Scene scene = new()
+            {
+                Nodes = new() { primaryNode }
+            };
+
+            //Build the glTF
+
+            Gltf gltf = new Gltf()
+            {
+                Asset = new() { Version = "2.0" },
+                Accessors = new()
+                {
+                    indicesAccessor,
+                    verticesAccessor,
+                    uvAccessor
+                },
+                Buffers = new()
+                {
+                    indicesBuffer,
+                    verticesBuffer
+                },
+                BufferViews= new()
+                {
+                    indicesBuffView,
+                    verticesBuffView
+                },
+                Images = new() { image },
+                Textures = new() { texture },
+                Materials = new() { material },
+                Meshes = new() { mesh },
+                Scenes = new() { scene },
+                Scene = scene,
+                Nodes = new () { primaryNode }
+            };
+
+
 
             sw.Write(JsonSerializer.Serialize(gltf, jsonSerializerOptions));
         }
