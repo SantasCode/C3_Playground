@@ -247,23 +247,28 @@ namespace C3.Exports
 
             //Build the parent node from v_body - bodyMesh
 
-            #region Top Level Node
-
+            #region Top Level 
             Node topLevelNode = new()
             {
-                Name = bodyMesh.Name,
-                //Children = new()
+                Name = "Player",
+                Children = new(),
             };
-
             gltf.Nodes.Add(topLevelNode);
 
-            var skinResults = BuildSkin(model, ref gltf);
+            ///
+            ///
+            ///
+            ///var skinResults = BuildSkin(model, ref gltf);
+
+            var skinResults = BuildSkin2(bodyMesh, model.Animations[0], ref gltf);
+            topLevelNode.Children.Add(skinResults.Skin.Skeleton);
 
             //Add skin to main node.
             topLevelNode.Skin = skinResults.Skin;
 
             #region Indices
-            ReadOnlySpan<byte> indicesByteSpan = MemoryMarshal.Cast<ushort, byte>(new ReadOnlySpan<ushort>(bodyMesh.Indices));
+            //Reverse the indices array for winding direction correction.
+            ReadOnlySpan<byte> indicesByteSpan = MemoryMarshal.Cast<ushort, byte>(new ReadOnlySpan<ushort>(bodyMesh.Indices.Reverse().ToArray()));
 
             Buffer indicesBuffer = new()
             {
@@ -326,12 +331,7 @@ namespace C3.Exports
                 var bone2Weight = phyVertex.BoneWeights[1].Weight;
                 var bone1Joint = (ushort)phyVertex.BoneWeights[0].Joint;
                 var bone2Joint = (ushort)phyVertex.BoneWeights[1].Joint;
-
-                bone1Joint = (ushort)skinResults.JointNodeMap[$"bone{bone1Joint}"].Index;
-                
-                if(bone2Joint != 0)
-                    bone2Joint = (ushort)skinResults.JointNodeMap[$"bone{bone2Joint}"].Index;
-                                
+                                                
                 //Write Joints
                 BinaryPrimitives.WriteUInt16LittleEndian(c3verticesBuffer.Slice(idx), (ushort)bone1Joint);
                 idx += 2;
@@ -630,6 +630,111 @@ namespace C3.Exports
             public required Skin Skin { get; init; }
             public required ReadOnlyDictionary<string, Node> JointNodeMap { get; init; }
         }
+        private static BuildSkinResults BuildSkin2(C3Phy mesh, C3Motion motion, ref Gltf gltf)
+        {
+            if (gltf.Skins == null) gltf.Skins = new();
+            if (gltf.Nodes == null) gltf.Nodes = new();
+            if (gltf.Buffers == null) gltf.Buffers = new();
+            if (gltf.BufferViews == null) gltf.BufferViews = new();
+            if (gltf.Accessors == null) gltf.Accessors = new();
+
+            Node vbodyNode = new()
+            {
+                Name = "v_body",
+                Children = new()
+            };
+            gltf.Nodes.Add(vbodyNode);
+
+
+            Dictionary<string, Node> jointNodeMap = new();
+
+            #region Skin
+            Skin skin = new() { Joints = new(), Skeleton = vbodyNode };
+            gltf.Skins.Add(skin);
+
+            //skin.Joints.Add(vbodyNode);
+            bool setRootJoint = true;
+
+            //Build the buffer containing all the skin matricies
+            int numberBones = (int)motion.BoneCount;
+
+            int matricesByteLength = numberBones * 16 * sizeof(float);//Each matrix is 16 floating point values.
+
+            Span<byte> ibm = new Span<byte>(new byte[matricesByteLength]);
+            int ibmIdx = 0;
+
+            //Populate the ibm with the matricies from unnamed bones.
+            var vBody = mesh;
+
+            if (vBody == null) throw new NotSupportedException("Expecting v_body to exist");
+
+            var vbodyMoti = motion;
+
+            if (vbodyMoti.KeyFramesCount != 1) throw new NotSupportedException("v_body is expected to have 1 key frame");
+
+            var keyFrame = vbodyMoti.BoneKeyFrames[0];
+
+            for (int i = 0; i < vbodyMoti.BoneCount; i++)
+            {
+                //Create a joint node
+                Node jNode = new() { Name = $"bone{i}" };
+                gltf.Nodes.Add(jNode);
+
+                //Add to skin joints
+                skin.Joints.Add(jNode);
+                //Add node to base skin node.
+                vbodyNode.Children.Add(jNode);
+
+                //Track this node for later.
+                jointNodeMap.Add(jNode.Name, jNode);
+
+                //Multiply By the mesh initial matrix of the mesh
+                Matrix cm = Matrix.Multiply(vBody.InitMatrix, keyFrame.Matricies[i]);
+
+                if (!cm.Decompose(out _, out _, out _)) throw new NotSupportedException("Unable to decompose matrix into transform, scale, and rotation compoenents");
+
+                Span<float> matrixFloatSpan = new Span<float>(cm.ToArray());
+                //Convert float span to byte span
+                Span<byte> matrixByteSpan = MemoryMarshal.Cast<float, byte>(matrixFloatSpan);
+                //Copy byte span to main matrix span buffer.
+                matrixByteSpan.CopyTo(ibm.Slice(ibmIdx));
+
+                ibmIdx += 64;
+            }
+
+            //Serialize the ibm into a buffer/bufferView/accessor and add to skin.
+            Buffer skinIbmBufffer = new()
+            {
+                ByteLength = ibm.Length,
+                Name = "Inverse Bind Matrices Buffer",
+                Uri = "data:application/gltf-buffer;base64," + Convert.ToBase64String(ibm)
+            };
+
+            BufferView skinIbmBuffView = new()
+            {
+                Buffer = skinIbmBufffer,
+                ByteLength = ibm.Length
+            };
+
+            Accessor skinIbmAccessor = new()
+            {
+                BufferView = skinIbmBuffView,
+                ComponentType = Accessor.ComponentTypeEnum.FLOAT,
+                Count = numberBones,
+                Type = Accessor.TypeEnum.MAT4,
+                Name = "Skin IBM accessor",
+            };
+
+            gltf.Buffers.Add(skinIbmBufffer);
+            gltf.BufferViews.Add(skinIbmBuffView);
+            gltf.Accessors.Add(skinIbmAccessor);
+
+            skin.InverseBindMatrices = skinIbmAccessor;
+            #endregion Skin
+
+            return new BuildSkinResults() { Skin = skin, JointNodeMap = new(jointNodeMap) };
+        }
+        
         private static BuildSkinResults BuildSkin(C3Model model, ref Gltf gltf)
         {
             if (gltf.Skins == null) gltf.Skins = new();
