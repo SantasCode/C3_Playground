@@ -116,6 +116,14 @@ namespace C3_Playground.Preview
                 DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\410285.dds", GraphicsDevice, false, out modelTexture);
                 bodyEffect.Texture = modelTexture;
             }
+            else if(true)
+            {
+                using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\002000000.c3" : _modelFile)))
+                    model = C3ModelLoader.Load(br);
+
+                DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\texture\002000000.dds" : _textureFile, GraphicsDevice, false, out modelTexture);
+                bodyEffect.Texture = modelTexture;
+            }
             else if (true) //Load a character w/ weapons and mount.
             {
                 //Load a Mesh.

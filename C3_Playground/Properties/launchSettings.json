@@ -38,11 +38,11 @@
     },
     "export-json": {
       "commandName": "Project",
-      "commandLineArgs": "export-json \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\" \"C:\\Temp\\output_json.json\""
+      "commandLineArgs": "export-json \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\002000000.c3\" \"C:\\Temp\\Conquer\\2000000.json\""
     },
     "export-gltf": {
       "commandName": "Project",
-      "commandLineArgs": "export-gltf \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\410280.C3\" \"C:\\Temp\\Conquer\\410280_stj.gltf\""
+      "commandLineArgs": "export-gltf \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\002000000.c3\" \"C:\\Temp\\Conquer\\002000000.gltf\""
     }
   }
 }

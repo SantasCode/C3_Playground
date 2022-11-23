@@ -21,10 +21,10 @@ namespace C3_Playground.Preview.Model
             {
                 foreach(var bone in mesh.Vertices[i].BoneWeights)
                 {
-                    if (!_boneStore.ContainsKey(bone.Item1))
-                        _boneStore.Add(bone.Item1, new List<(uint, float)>());
+                    if (!_boneStore.ContainsKey(bone.Joint))
+                        _boneStore.Add(bone.Joint, new List<(uint, float)>());
                     
-                    _boneStore[bone.Item1].Add((i, bone.Item2));
+                    _boneStore[bone.Joint].Add((i, bone.Weight));
                 }
             }
         }

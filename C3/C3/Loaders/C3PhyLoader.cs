@@ -109,7 +109,7 @@ namespace C3.Loaders
         {
             var vert = new PhyVertex()
             {
-                BoneWeights = new(uint, float)[PhyVertex.BONE_MAX]
+                BoneWeights = new JointWeight[PhyVertex.BONE_MAX]
             };
 
             vert.Position = br.ReadVector3();
@@ -128,8 +128,15 @@ namespace C3.Loaders
             float b1Weight = br.ReadSingle();
             float b2Weight = br.ReadSingle();
 
-            vert.BoneWeights[0] = (b1Idx, b1Weight);
-            vert.BoneWeights[1] = (b2Idx, b2Weight);
+            vert.BoneWeights[0] = new JointWeight() { Joint = b1Idx, Weight = b1Weight };
+            vert.BoneWeights[1] = new JointWeight() { Joint = b2Idx, Weight = b2Weight };
+            if (b1Idx == b2Idx)
+            {
+                //Console.WriteLine($"Combining Duplicate joint");
+                vert.BoneWeights[0] = new JointWeight { Joint = b1Idx, Weight = 1.0f };
+                vert.BoneWeights[1] = new JointWeight { Joint = 0, Weight = 0 };
+            }
+
 
             if (Type == "PHY2" || Type == "PHY3")
                 vert.UnknownVector3 = br.ReadVector3();

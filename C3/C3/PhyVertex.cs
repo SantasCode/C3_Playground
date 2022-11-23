@@ -10,7 +10,7 @@ namespace C3
 
         public uint Color { get; set; }
         
-        public (uint, float)[] BoneWeights { get; set; }
+        public JointWeight[] BoneWeights { get; set; }
         public Vector3? UnknownVector3 { get; set; }
 
 
@@ -19,5 +19,10 @@ namespace C3
         public static uint MORPH_MAX => 4;
 
 
+    }
+    public class JointWeight
+    {
+        public uint Joint { get; set; }
+        public float Weight { get; set; }
     }
 }

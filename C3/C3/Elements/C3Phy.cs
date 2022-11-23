@@ -24,7 +24,7 @@ namespace C3.Elements
         public C3Key Key { get; set; }
         public uint TextureRow { get; set; }
 
-        public Matrix? InitMatrix { get; set; }
+        public Matrix InitMatrix { get; set; }
 
         public Vector2? uvStep { get; set; }
     }

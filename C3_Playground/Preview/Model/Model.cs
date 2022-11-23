@@ -137,7 +137,8 @@ namespace C3_Playground.Preview.Model
                     {
                         foreach (var vertexIdx in boneVertices)
                         {
-                            if (vertexIdx.Item2 == 0) continue;
+                            if (vertexIdx.Item2 == 0) 
+                                continue;
                             vertices[vertexIdx.Item1] = new VertexPositionTexture()
                             {
                                 TextureCoordinate = new Vector2(_c3Phy.Vertices[vertexIdx.Item1].U, _c3Phy.Vertices[vertexIdx.Item1].V),

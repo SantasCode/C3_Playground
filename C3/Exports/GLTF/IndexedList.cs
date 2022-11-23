@@ -29,6 +29,11 @@ namespace C3.Exports.GLTF
             item.Index = _list.Count;
             _list.Add(item);
         }
+        public void AddRange(IEnumerable<T> collection)
+        {
+            foreach(var item in collection)
+                Add(item);
+        }
 
         public void Clear() => _list.Clear();
 
