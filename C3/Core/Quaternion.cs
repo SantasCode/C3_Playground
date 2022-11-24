@@ -5,6 +5,7 @@ namespace C3.Core
     {
         public float X,Y,Z,W;
         public static Quaternion Identity => new Quaternion(0, 0, 0, 1);
+        public float[] ToArray() => new[] { X, Y, Z, W };
         public Quaternion() { }
         public Quaternion(float x, float y, float z, float w)
         {
