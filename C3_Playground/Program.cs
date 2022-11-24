@@ -161,7 +161,7 @@ namespace C3_Playground
             }
         }
         [Command("export-gltf")]
-        public void Export_gltf([Argument][FileExists] string filePath, [Argument] string outputPath)
+        public void Export_gltf([Argument][FileExists] string filePath, [Argument][FileExists] string texturePath, [Argument] string outputPath)
         {
             C3Model? model = null;
             using (BinaryReader br = new BinaryReader(File.OpenRead(filePath)))
@@ -172,7 +172,7 @@ namespace C3_Playground
                 if (File.Exists(outputPath))
                     File.Delete(outputPath);
                 using (StreamWriter tw = new StreamWriter(File.OpenWrite(outputPath)))
-                    GLTF2Export.Export(model, tw);
+                    GLTF2Export.Export(model, texturePath, tw);
             }
         }
 

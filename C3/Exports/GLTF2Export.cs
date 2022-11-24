@@ -219,7 +219,7 @@ namespace C3.Exports
             };
             sw.Write(JsonSerializer.Serialize(gltf, jsonSerializerOptions));
         }
-        public static void Export(C3Model model, StreamWriter sw)
+        public static void Export(C3Model model,string texturePath, StreamWriter sw)
         {
             //If it doesn't have v_body, just export as a simple weapon/item.
             var bodyMesh = model.Meshs.Where(p => p.Name == "v_body").FirstOrDefault();
@@ -246,15 +246,16 @@ namespace C3.Exports
                 Scenes = new()
             };
 
+
+
+            #region Skin
+            //The Skin is the same skin used for all the different meshes of this model. Multiple nodes will refer to this skin/skeleton
+
             Node skinnedMeshNode = new()
             {
                 Name = "Player"
             };
             gltf.Nodes.Add(skinnedMeshNode);
-
-
-            #region Skin
-            //The Skin is the same skin used for all the different meshes of this model. Multiple nodes will refer to this skin/skeleton
 
             var skinResults = BuildSkeletonSkin(bodyMesh, model.Animations[0], ref gltf);
             //Add skin to main node.
@@ -272,15 +273,15 @@ namespace C3.Exports
 
             #region Animation
             BuildAnimation(bodyMesh.InitMatrix, "Pose 1", model.Animations[0], skinResults.JointNodeMap, ref gltf);
-            //foreach (var file in Directory.GetFiles(@"D:\Programming\Conquer\Clients\5165\c3\0002\000"))
-            //{
-            //    C3Model newModel = new();
-            //    using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
-            //        newModel = C3ModelLoader.Load(br);
-            //    string fileNAme = new FileInfo(file).Name;
-            //    if (newModel != null)
-            //        BuildAnimation(bodyMesh.InitMatrix, fileNAme, newModel.Animations[0], skinResults.JointNodeMap, ref gltf);
-            //}
+            foreach (var file in Directory.GetFiles(@"D:\Programming\Conquer\Clients\5165\c3\0002\000"))
+            {
+                C3Model newModel = new();
+                using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
+                    newModel = C3ModelLoader.Load(br);
+                string fileNAme = new FileInfo(file).Name;
+                if (newModel != null)
+                    BuildAnimation(bodyMesh.InitMatrix, fileNAme, newModel.Animations[0], skinResults.JointNodeMap, ref gltf);
+            }
             #endregion Animation
 
             #region Indices
@@ -375,7 +376,6 @@ namespace C3.Exports
                 Name = "UV accessor"
             };
 
-            //Joint Accessor
             Accessor jointAccessor = new()
             {
                 BufferView = verticesBuffView,
@@ -386,7 +386,6 @@ namespace C3.Exports
                 Name = "joint accessor"
             };
 
-            //Weight Accessor
             Accessor weightAccessor = new()
             {
                 BufferView = verticesBuffView,
@@ -399,7 +398,7 @@ namespace C3.Exports
             #endregion Vertices
 
             #region Texture
-            byte[] imBytes = File.ReadAllBytes(@"C:\Temp\Conquer\002000000.png");
+            byte[] imBytes = File.ReadAllBytes(texturePath);
             Image image = new()
             {
                 Uri = "data:image/png;base64," + Convert.ToBase64String(imBytes),
@@ -469,137 +468,6 @@ namespace C3.Exports
             gltf.Buffers.AddRange(new List<Buffer> { indicesBuffer, verticesBuffer });
             gltf.BufferViews.AddRange(new List<BufferView> { indicesBuffView, verticesBuffView });
             gltf.Accessors.AddRange(new List<Accessor> { indicesAccessor, verticesAccessor, uvAccessor, jointAccessor, weightAccessor });
-
-
-            /*
-            //Loop through children mesh and create child nodes.
-            foreach (var c3mesh in model.Meshs.Where(p => p.Name != "v_body"))
-            {
-                Node childNode = new()
-                {
-                    Name = c3mesh.Name
-                };
-
-                #region Indices
-                ReadOnlySpan<byte> childIndicesByteSpan = MemoryMarshal.Cast<ushort, byte>(new ReadOnlySpan<ushort>(c3mesh.Indices.Reverse().ToArray()));
-
-                Buffer childIndicesBuffer = new()
-                {
-                    ByteLength = childIndicesByteSpan.Length,
-                    Name = "Indices Bufffer",
-                    Uri = "data:application/gltf-buffer;base64," + Convert.ToBase64String(childIndicesByteSpan)
-                };
-
-                BufferView childIndicesBuffView = new()
-                {
-                    Buffer = childIndicesBuffer,
-                    ByteOffset = 0,
-                    ByteLength = c3mesh.Indices.Length * sizeof(ushort),
-                    Target = BufferView.TargetEnum.ELEMENT_ARRAY_BUFFER
-                };
-
-                Accessor childIndicesAccessor = new()
-                {
-                    BufferView = childIndicesBuffView,
-                    ComponentType = Accessor.ComponentTypeEnum.UNSIGNED_SHORT,
-                    Count = c3mesh.Indices.Length,
-                    Type = Accessor.TypeEnum.SCALAR,
-                    Min = new() { (float)c3mesh.Indices.Min() },
-                    Max = new() { (float)c3mesh.Indices.Max() }
-                };
-                #endregion Indices
-
-                #region Vertices
-
-                (var cmax, var cmin, var cmaxUV, var cminUV) = GetBoundingBox(c3mesh.Vertices);
-
-                Span<float> childC3vertices = new(new float[c3mesh.Vertices.Length * 5]);
-                int childIdx = 0;
-                foreach (var phyVertex in c3mesh.Vertices)
-                {
-                    childC3vertices[childIdx] = phyVertex.Position.X;
-                    childC3vertices[childIdx + 1] = phyVertex.Position.Y;
-                    childC3vertices[childIdx + 2] = phyVertex.Position.Z;
-                    childC3vertices[childIdx + 3] = phyVertex.U;
-                    childC3vertices[childIdx + 4] = phyVertex.V;
-                    childIdx += 5;
-                }
-
-                ReadOnlySpan<byte> childVerticesByteSpan = MemoryMarshal.Cast<float, byte>(childC3vertices);
-
-                Buffer childVerticesBuffer = new()
-                {
-                    ByteLength = childVerticesByteSpan.Length,
-                    Name = "Vertices Buffer",
-                    Uri = "data:application/gltf-buffer;base64," + Convert.ToBase64String(childVerticesByteSpan)
-                };
-
-                BufferView childVerticesBuffView = new()
-                {
-                    Buffer = childVerticesBuffer,
-                    ByteLength = c3mesh.Vertices.Length * sizeof(float) * 5, //3 floats per Vector3 + Vector2.
-                    Target = BufferView.TargetEnum.ARRAY_BUFFER,
-                    ByteStride = sizeof(float) * 5 // 1x Vector3 + 1x Vector2;
-                };
-
-                Accessor childVerticesAccessor = new()
-                {
-                    BufferView = childVerticesBuffView,
-                    ComponentType = Accessor.ComponentTypeEnum.FLOAT,
-                    Count = c3mesh.Vertices.Length,
-                    Type = Accessor.TypeEnum.VEC3,
-                    Min = new() { cmin.X, cmin.Y, cmin.Z },
-                    Max = new() { cmax.X, cmax.Y, cmax.Z }
-                };
-
-                Accessor childUvAccessor = new()
-                {
-                    BufferView = childVerticesBuffView,
-                    ByteOffset = sizeof(float) * 3,//Offset for 1x Vector3
-                    ComponentType = Accessor.ComponentTypeEnum.FLOAT,
-                    Count = c3mesh.Vertices.Length,
-                    Type = Accessor.TypeEnum.VEC2,
-                    //Min = new() { minUV.X, minUV.Y },
-                    //Max = new() { maxUV.X, maxUV.Y }
-                };
-                #endregion Vertices
-
-                //Child nodes don't have textures/materials
-
-                #region Mesh
-                Mesh childMesh = new()
-                {
-                    Primitives = new()
-                    {
-                        new()
-                        {
-                            Indices = childIndicesAccessor, //Index to indices accessor
-                            Attributes = new()
-                            {
-                                { "POSITION", childVerticesAccessor },
-                                { "TEXCOORD_0", childUvAccessor }
-                            }
-                        }
-                    },
-                    Name = "Base"
-                };
-
-                gltf.Meshes.Add(childMesh);
-
-                //Add mesh to node
-                childNode.Mesh = childMesh;
-                #endregion Mesh
-
-                //Add components to top level collections.
-                gltf.Nodes.Add(childNode);
-                gltf.Buffers.AddRange(new List<Buffer> { childIndicesBuffer, childVerticesBuffer });
-                gltf.BufferViews.AddRange(new List<BufferView> { childIndicesBuffView, childVerticesBuffView });
-                gltf.Accessors.AddRange(new List<Accessor> { childUvAccessor, childIndicesAccessor, childVerticesAccessor });
-
-                //Add this child node to the parent node.
-                topLevelNode.Children.Add(childNode);
-            }
-            */
 
             JsonSerializerOptions jsonSerializerOptions = new()
             {
