@@ -15,5 +15,9 @@
             Z = z;
         }
         public Vector3() { }
+        public float Length()
+        {
+            return (float)Math.Sqrt(X* X + Y * Y + Z * Z);
+        }
     }
 }

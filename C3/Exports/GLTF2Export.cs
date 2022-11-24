@@ -3,6 +3,7 @@ using C3.Elements;
 using C3.Exports.GLTF.Schema;
 using System.Buffers.Binary;
 using System.Collections.ObjectModel;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -237,7 +238,7 @@ namespace C3.Exports
                 Nodes = new(),
                 Accessors = new(),
                 Buffers = new(),
-                BufferViews= new(),
+                BufferViews = new(),
                 Meshes = new(),
                 Images = new(),
                 Materials = new(),
@@ -245,26 +246,32 @@ namespace C3.Exports
                 Scenes = new()
             };
 
-            //Build the parent node from v_body - bodyMesh
-
-            #region Top Level 
-            Node topLevelNode = new()
+            Node skinnedMeshNode = new()
             {
-                Name = "Player",
-                Children = new(),
+                Name = "Player"
             };
-            gltf.Nodes.Add(topLevelNode);
+            gltf.Nodes.Add(skinnedMeshNode);
 
-            ///
-            ///
-            ///
-            ///var skinResults = BuildSkin(model, ref gltf);
 
-            var skinResults = BuildSkin2(bodyMesh, model.Animations[0], ref gltf);
-            topLevelNode.Children.Add(skinResults.Skin.Skeleton);
+            #region Skin
 
+            var skinResults = BuildSkin(bodyMesh, model.Animations[0], ref gltf);
             //Add skin to main node.
-            topLevelNode.Skin = skinResults.Skin;
+            skinnedMeshNode.Skin = skinResults.Skin;
+
+            #endregion Skin
+
+            Node transformNode = new()
+            {
+                //Matrix = bodyMesh.InitMatrix.ToArray(),
+                Name = "initial transform",
+                Children = new() { skinResults.Skin.Skeleton }
+            };
+            gltf.Nodes.Add(transformNode);
+
+            #region Animation
+            BuildAnimation(bodyMesh.InitMatrix, "Pose", model.Animations[0], skinResults.JointNodeMap, ref gltf);
+            #endregion Animation
 
             #region Indices
             //Reverse the indices array for winding direction correction.
@@ -462,7 +469,7 @@ namespace C3.Exports
                 Name = "Base"
             };
             //Add mesh to node.
-            topLevelNode.Mesh = mesh;
+            skinnedMeshNode.Mesh = mesh;
 
             gltf.Meshes.Add(mesh);
             #endregion Mesh
@@ -470,7 +477,7 @@ namespace C3.Exports
             #region Scene
             Scene scene = new()
             {
-                Nodes = new() { topLevelNode }
+                Nodes = new() { skinnedMeshNode, transformNode }//skinResults.Skin.Skeleton }
             };
             gltf.Scenes.Add(scene);
             gltf.Scene = scene;
@@ -482,9 +489,6 @@ namespace C3.Exports
             gltf.BufferViews.AddRange(new List<BufferView> { indicesBuffView, verticesBuffView });
             gltf.Accessors.AddRange(new List<Accessor> { indicesAccessor, verticesAccessor, uvAccessor, jointAccessor, weightAccessor });
 
-
-
-            #endregion Top Level Node
 
             /*
             //Loop through children mesh and create child nodes.
@@ -630,7 +634,7 @@ namespace C3.Exports
             public required Skin Skin { get; init; }
             public required ReadOnlyDictionary<string, Node> JointNodeMap { get; init; }
         }
-        private static BuildSkinResults BuildSkin2(C3Phy mesh, C3Motion motion, ref Gltf gltf)
+        private static BuildSkinResults BuildSkin(C3Phy mesh, C3Motion motion, ref Gltf gltf)
         {
             if (gltf.Skins == null) gltf.Skins = new();
             if (gltf.Nodes == null) gltf.Nodes = new();
@@ -638,22 +642,22 @@ namespace C3.Exports
             if (gltf.BufferViews == null) gltf.BufferViews = new();
             if (gltf.Accessors == null) gltf.Accessors = new();
 
-            Node vbodyNode = new()
+            Node commonRoot = new()
             {
-                Name = "v_body",
-                Children = new()
+                Name = "skeleton",
+                Children = new(),
+                //Matrix = mesh.InitMatrix.ToArray()
             };
-            gltf.Nodes.Add(vbodyNode);
+            gltf.Nodes.Add(commonRoot);
 
 
             Dictionary<string, Node> jointNodeMap = new();
 
             #region Skin
-            Skin skin = new() { Joints = new(), Skeleton = vbodyNode };
+            Skin skin = new() { Joints = new(), Skeleton = commonRoot };
             gltf.Skins.Add(skin);
 
             //skin.Joints.Add(vbodyNode);
-            bool setRootJoint = true;
 
             //Build the buffer containing all the skin matricies
             int numberBones = (int)motion.BoneCount;
@@ -680,18 +684,39 @@ namespace C3.Exports
                 Node jNode = new() { Name = $"bone{i}" };
                 gltf.Nodes.Add(jNode);
 
+
                 //Add to skin joints
                 skin.Joints.Add(jNode);
                 //Add node to base skin node.
-                vbodyNode.Children.Add(jNode);
+                commonRoot.Children.Add(jNode);
 
                 //Track this node for later.
                 jointNodeMap.Add(jNode.Name, jNode);
 
                 //Multiply By the mesh initial matrix of the mesh
                 Matrix cm = Matrix.Multiply(vBody.InitMatrix, keyFrame.Matricies[i]);
+                //Matrix cm = keyFrame.Matricies[i];
+                
+                
+                Matrix cmT = cm.Transpose();
 
-                if (!cm.Decompose(out _, out _, out _)) throw new NotSupportedException("Unable to decompose matrix into transform, scale, and rotation compoenents");
+                if (!cm.Decompose(out var scale, out var rotation, out var translation)) throw new NotSupportedException("Unable to decompose matrix into transform, scale, and rotation compoenents");
+
+                cmT.DecomposeCM(out var t2, out var r2, out var s2);
+                
+                //jNode.Matrix = cm.ToArray();
+
+                //Matrix m2 = Matrix.Compose(t2, r2, s2);
+
+                //jNode.Scale = s2.ToArray();
+                //jNode.Rotation = r2.ToArray();
+                //jNode.Translation = t2.ToArray();
+
+                var scaleMatrix = Matrix.CreateFromScale(scale);//.Transpose();
+                var rotatMatrix = Matrix.CreateFromQuaternion(rotation);//.Transpose();
+                var transMatrix = Matrix.CreateFromTranslation(translation);//.Transpose();
+
+                var composed = Matrix.Multiply(Matrix.Multiply(transMatrix, rotatMatrix),  scaleMatrix).Transpose();
 
                 Span<float> matrixFloatSpan = new Span<float>(cm.ToArray());
                 //Convert float span to byte span
@@ -729,169 +754,202 @@ namespace C3.Exports
             gltf.BufferViews.Add(skinIbmBuffView);
             gltf.Accessors.Add(skinIbmAccessor);
 
-            skin.InverseBindMatrices = skinIbmAccessor;
+            //skin.InverseBindMatrices = skinIbmAccessor;
             #endregion Skin
 
             return new BuildSkinResults() { Skin = skin, JointNodeMap = new(jointNodeMap) };
         }
         
-        private static BuildSkinResults BuildSkin(C3Model model, ref Gltf gltf)
+        private static void BuildAnimation(Matrix initMatrix, string name, C3Motion motion, ReadOnlyDictionary<string, Node> boneNodeMap, ref Gltf gltf)
         {
-            if (gltf.Skins == null) gltf.Skins = new();
-            if (gltf.Nodes == null) gltf.Nodes = new();
-            if (gltf.Buffers == null) gltf.Buffers = new();
-            if (gltf.BufferViews == null) gltf.BufferViews = new();
-            if (gltf.Accessors == null) gltf.Accessors = new();
+            if(gltf.Buffers == null) gltf.Buffers = new();
+            if(gltf.Nodes == null) gltf.Nodes = new();
+            if(gltf.Accessors == null) gltf.Accessors = new();
+            if(gltf.BufferViews == null) gltf.BufferViews = new();
+            if (gltf.Animations == null) gltf.Animations = new();
+                
+            int byteStride =12 + 12 + 16;//float, vec3, vec3, vec 4
+            int totalBytes = (byteStride * (int)motion.BoneCount + 4)* motion.BoneKeyFrames.Count() ;
 
+            //Single Buffer
+            //One BuffferView Per Node.
+            //Six Accessors Per Node.
+            DynamicByteBuffer animBufffer = new(totalBytes);
 
-            Dictionary<string, Node> jointNodeMap = new();
+            Buffer buffer = new() { ByteLength = totalBytes };
+            gltf.Buffers.Add(buffer);
 
-            #region Skin
-            Skin skin = new() { Joints = new() };
-            gltf.Skins.Add(skin);
-
-            //All joint nodes are children of this node.
-            Node baseSkinNode = new()
+            Animation animation = new() 
             {
-                Name = "SkinBaseNode",
-                Children = new()
+                Channels = new(),
+                Samplers = new(),
+                Name = name,
             };
-            gltf.Nodes.Add(baseSkinNode);
+            gltf.Animations.Add(animation);
 
-            //Add to skin joints
-            skin.Joints.Add(baseSkinNode);
+            //Assumptions - need to test before reducing footprint of bytebuffer.
+            //KKEY can have scale, rotation, and translation
+            //ZKEY can have rotation and translation.
+            //XKEY can have scale and rotation
 
-            //Build the buffer containing all the skin matricies
-            int numberBones = (int)model.Animations.Sum(x => x.BoneCount);
-            
-            int matricesByteLength = numberBones * 16 * sizeof(float);//Each matrix is 16 floating point values.
-            
-            Span<byte> ibm = new Span<byte>(new byte[matricesByteLength + 16 * 4]);
-            int ibmIdx = 0;
+            //Time per frame in seconds
+            float timePerFrame = 33f / 1000f;//Assumptions - 33ms per frame.
 
-            Span<float> imatrix = new Span<float>(Matrix.Identity.ToArray());
-            //Convert float span to byte span
-            Span<byte> imatrixBs = MemoryMarshal.Cast<float, byte>(imatrix);
-            //Copy byte span to main matrix span buffer.
-            imatrixBs.CopyTo(ibm.Slice(ibmIdx));
-
-            ibmIdx += 64;
-
-            //Populate the ibm with matrices, starting with NAMED bones.
-            var namedBones = model.Meshs.Where(p => p.Name != "v_body");
-            foreach(var namedBone in namedBones)
+            //Build timeBufferView, time is same for all bones
+            float minTime = float.MaxValue;
+            float maxTime = float.MinValue;
+            foreach (var keyFrame in motion.BoneKeyFrames)
             {
-                //Get the "MOTI" object from index of namedBone.
-                int namedBoneIdx = model.Meshs.IndexOf(namedBone);
+                //Write the Time.
+                float time = keyFrame.FrameNumber * timePerFrame;
+                
+                if(time > maxTime) maxTime = time;
+                if(time < minTime) minTime = time;
 
-                var moti = model.Animations[namedBoneIdx];
+                animBufffer.Write(time);
+            }
 
-                //Create the joint node.
-                Node jointNode = new()
+            BufferView timeBuffView = new()
+            {
+                Buffer = buffer,
+                Name = $"frame time",
+                ByteLength = 4 * motion.BoneKeyFrames.Count()
+            };
+            gltf.BufferViews.Add(timeBuffView);
+
+            Accessor timeAccessor = new()
                 {
-                    Name = namedBone.Name
+                    BufferView = timeBuffView,
+                    ComponentType = Accessor.ComponentTypeEnum.FLOAT,
+                    Type = Accessor.TypeEnum.SCALAR,
+                    Name = $"frame time",
+                    Count = (int)motion.BoneKeyFrames.Count(),
+                    Min = new() { minTime},
+                    Max = new() { maxTime}
+            };
+            gltf.Accessors.Add(timeAccessor);
+
+
+            for (int boneIdx = 0; boneIdx < motion.BoneCount; boneIdx++) 
+            {
+                BufferView scaleBuffView = new()
+                {
+                    Buffer = buffer,
+                    Name = $"bone{boneIdx} scale",
+                    ByteLength = 12 * motion.BoneKeyFrames.Count(),
+                    ByteOffset = animBufffer.Count,
                 };
-                gltf.Nodes.Add(jointNode);
-                //Add to skin joints
-                skin.Joints.Add(jointNode);
-                //Add this joint to the base skin Joint.
-                baseSkinNode.Children.Add(jointNode);
+                BufferView translationBuffView = new()
+                {
+                    Buffer = buffer,
+                    Name = $"bone{boneIdx} trans",
+                    ByteLength = 12 * motion.BoneKeyFrames.Count(),
+                    ByteOffset = animBufffer.Count + 12 * motion.BoneKeyFrames.Count(),
+                };
+                BufferView rotationBuffView = new()
+                {
+                    Buffer = buffer,
+                    Name = $"bone{boneIdx} rot",
+                    ByteLength = 16 * motion.BoneKeyFrames.Count(),
+                    ByteOffset = animBufffer.Count + 12 * motion.BoneKeyFrames.Count() + 12 * motion.BoneKeyFrames.Count(),
+                };
+                gltf.BufferViews.AddRange(new List<BufferView> { scaleBuffView, translationBuffView, rotationBuffView });
 
-                //Track this node for later.
-                jointNodeMap.Add(jointNode.Name, jointNode);
+                Accessor scaleMatrixAccessor = new()
+                {
+                    BufferView = scaleBuffView,
+                    ComponentType = Accessor.ComponentTypeEnum.FLOAT,
+                    Type = Accessor.TypeEnum.VEC3,
+                    Name = $"bone{boneIdx} scale",
+                    Count = (int)motion.BoneKeyFrames.Count()
+                };
+                Accessor translationMatrixAccessor = new()
+                {
+                    BufferView = translationBuffView,
+                    ComponentType = Accessor.ComponentTypeEnum.FLOAT,
+                    Type = Accessor.TypeEnum.VEC3,
+                    Name = $"bone{boneIdx} trans",
+                    Count = (int)motion.BoneKeyFrames.Count()
+                };
+                Accessor rotationMatrixAccessor = new()
+                {
+                    BufferView = rotationBuffView,
+                    ComponentType = Accessor.ComponentTypeEnum.FLOAT,
+                    Type = Accessor.TypeEnum.VEC4,
+                    Name = $"bone{boneIdx} rot",
+                    Count = (int)motion.BoneKeyFrames.Count()
+                };
+                gltf.Accessors.AddRange( new List<Accessor> { scaleMatrixAccessor, translationMatrixAccessor, rotationMatrixAccessor });
 
-                //Populate the byte buffer with the bone matrix.
-                if (moti.KeyFramesCount != 1) throw new NotSupportedException("Named bone is expected to have 1 key frame");
-                if (moti.BoneCount != 1) throw new NotSupportedException("Named bone is expected to have 1 bone");
+                //Three samplers per bone.
+                AnimationSampler scaleSampler = new()
+                {
+                    Input = timeAccessor,
+                    Output = scaleMatrixAccessor
+                };
+                AnimationSampler translationSampler = new()
+                {
+                    Input = timeAccessor,
+                    Output = translationMatrixAccessor
+                };
+                AnimationSampler rotationSampler = new()
+                {
+                    Input = timeAccessor,
+                    Output = rotationMatrixAccessor
+                };
+                animation.Samplers.AddRange( new List<AnimationSampler> { scaleSampler, translationSampler, rotationSampler });
 
-                //Multiply By the mesh initial matrix of the mesh
-                Matrix m = Matrix.Multiply(namedBone.InitMatrix, moti.BoneKeyFrames[0].Matricies[0]);
+                //Three channels per bone.
+                AnimationChannel scaleChannel = new()
+                {
+                    Sampler = scaleSampler,
+                    Target = new() 
+                    { 
+                        Path = AnimationChannelTarget.PathEnum.scale,
+                        Node = boneNodeMap[$"bone{boneIdx}"]
+                    }
+                };
+                AnimationChannel translationChannel = new()
+                {
+                    Sampler = translationSampler,
+                    Target = new()
+                    {
+                        Path = AnimationChannelTarget.PathEnum.translation,
+                        Node = boneNodeMap[$"bone{boneIdx}"]
+                    }
+                };
+                AnimationChannel rotationChannel = new()
+                {
+                    Sampler = rotationSampler,
+                    Target = new()
+                    {
+                        Path = AnimationChannelTarget.PathEnum.rotation,
+                        Node = boneNodeMap[$"bone{boneIdx}"]
+                    }
+                };
 
-                if (!m.Decompose(out _, out _, out _)) throw new NotSupportedException("Unable to decompose matrix into transform, scale, and rotation compoenents");
-                //Should only be a single bone matrix.
-                Span<float> matrixfs = new Span<float>(m.ToArray());
-                //Convert float span to byte span
-                Span<byte> matrixbs = MemoryMarshal.Cast<float, byte>(matrixfs);
-                //Copy byte span to main matrix span buffer.
-                matrixbs.CopyTo(ibm.Slice(ibmIdx));
+                animation.Channels.AddRange(new List<AnimationChannel> { scaleChannel, translationChannel, rotationChannel });
 
-                ibmIdx += 64;
+                DynamicByteBuffer transDynamicBuffer = new(12 * motion.BoneKeyFrames.Count());
+                DynamicByteBuffer rotationDynamicBuffer = new(16 * motion.BoneKeyFrames.Count());
+
+                foreach (var keyFrame in motion.BoneKeyFrames)
+                {
+                    Matrix m = Matrix.Multiply(initMatrix, keyFrame.Matricies[boneIdx]);
+                    //Matrix m = keyFrame.Matricies[boneIdx];
+                    m.Transpose().DecomposeCM(out var translation, out var rotation, out var scale);
+
+                    animBufffer.Write(scale);
+                    transDynamicBuffer.Write(translation);
+                    rotationDynamicBuffer.Write(rotation);
+                }
+                animBufffer.Write(transDynamicBuffer.ToArray());
+                animBufffer.Write(rotationDynamicBuffer.ToArray());
             }
-
-            //Populate the ibm with the matricies from unnamed bones.
-            var vBody = model.Meshs.Where(p => p.Name == "v_body").FirstOrDefault();
-
-            if (vBody == null) throw new NotSupportedException("Expecting v_body to exist");
-
-            int vBodyIdx = model.Meshs.IndexOf(vBody);
-
-            var vbodyMoti = model.Animations[vBodyIdx];
-
-
-            if (vbodyMoti.KeyFramesCount != 1) throw new NotSupportedException("v_body is expected to have 1 key frame");
-
-            var keyFrame = vbodyMoti.BoneKeyFrames[0];
-
-            for (int i = 0; i < vbodyMoti.BoneCount; i++)
-            {
-                //Create a joint node
-                Node jNode = new() { Name = $"bone{i}" };
-                gltf.Nodes.Add(jNode);
-
-                //Add to skin joints
-                skin.Joints.Add(jNode);
-                //Add node to base skin node.
-                baseSkinNode.Children.Add(jNode);
-
-                //Track this node for later.
-                jointNodeMap.Add(jNode.Name, jNode);
-
-                //Multiply By the mesh initial matrix of the mesh
-                Matrix cm = Matrix.Multiply(vBody.InitMatrix, vbodyMoti.BoneKeyFrames[0].Matricies[i]);
-
-                if (!cm.Decompose(out _, out _, out _)) throw new NotSupportedException("Unable to decompose matrix into transform, scale, and rotation compoenents");
-
-                Span<float> matrixFloatSpan = new Span<float>(cm.ToArray());
-                //Convert float span to byte span
-                Span<byte> matrixByteSpan = MemoryMarshal.Cast<float, byte>(matrixFloatSpan);
-                //Copy byte span to main matrix span buffer.
-                matrixByteSpan.CopyTo(ibm.Slice(ibmIdx));
-
-                ibmIdx += 64;
-            }
-
-            //Serialize the ibm into a buffer/bufferView/accessor and add to skin.
-            Buffer skinIbmBufffer = new()
-            {
-                ByteLength = ibm.Length,
-                Name = "Inverse Bind Matrices Buffer",
-                Uri = "data:application/gltf-buffer;base64," + Convert.ToBase64String(ibm)
-            };
-
-            BufferView skinIbmBuffView = new()
-            {
-                Buffer = skinIbmBufffer,
-                ByteLength = ibm.Length
-            };
-
-            Accessor skinIbmAccessor = new()
-            {
-                BufferView = skinIbmBuffView,
-                ComponentType = Accessor.ComponentTypeEnum.FLOAT,
-                Count = numberBones+1,
-                Type = Accessor.TypeEnum.MAT4,
-                Name = "Skin IBM accessor",
-            };
-
-            gltf.Buffers.Add(skinIbmBufffer);
-            gltf.BufferViews.Add(skinIbmBuffView);
-            gltf.Accessors.Add(skinIbmAccessor);
-
-            skin.InverseBindMatrices = skinIbmAccessor;
-            #endregion Skin
-
-            return new BuildSkinResults() { Skin = skin, JointNodeMap = new(jointNodeMap) };
+            buffer.Uri = "data:application/gltf-buffer;base64," + animBufffer.ToBase64();
+            buffer.Name = "Animation " + name;
         }
+
         private static (Vector3 BoxMin, Vector3 BoxMax, Vector2 UVMin, Vector2 UVMax) GetBoundingBox(PhyVertex[] vertices)
         {
             Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
