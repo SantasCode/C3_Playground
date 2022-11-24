@@ -2,7 +2,7 @@
 
 namespace C3.Exports.GLTF.Schema
 {
-    internal class AnimationSampler
+    internal class AnimationSampler : IndexedItem
     {
         [JsonConverter(typeof(IndexedItemConverter<Accessor>))]
         public required Accessor Input { get; set; }
