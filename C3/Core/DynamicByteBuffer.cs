@@ -61,6 +61,11 @@ namespace C3.Core
             foreach (var f in value)
                 Write(f);
         }
+        public void Write(ushort[] value)
+        {
+            foreach (var f in value)
+                Write(f);
+        }
         public void Write(Matrix value) 
         {
             Write(value.ToArray());

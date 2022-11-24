@@ -326,51 +326,22 @@ namespace C3.Exports
              *}
              */
 
-            Span<byte> c3verticesBuffer = new(new byte[bodyMesh.Vertices.Length * 11 * 4]);
-            
-            int idx = 0;
+            DynamicByteBuffer c3vertBuff = new(bodyMesh.Vertices.Length * 11 * 4);
 
             foreach (var phyVertex in bodyMesh.Vertices)
             {
-                BinaryPrimitives.WriteSingleLittleEndian(c3verticesBuffer.Slice(idx), phyVertex.Position.X);
-                idx += 4;
-                BinaryPrimitives.WriteSingleLittleEndian(c3verticesBuffer.Slice(idx), phyVertex.Position.Y);
-                idx += 4;
-                BinaryPrimitives.WriteSingleLittleEndian(c3verticesBuffer.Slice(idx), phyVertex.Position.Z);
-                idx += 4;
-                BinaryPrimitives.WriteSingleLittleEndian(c3verticesBuffer.Slice(idx), phyVertex.U);
-                idx += 4;
-                BinaryPrimitives.WriteSingleLittleEndian(c3verticesBuffer.Slice(idx), phyVertex.V);
-                idx += 4;
-
-                //Remap Joint to new node index.
-                var bone1Weight = phyVertex.BoneWeights[0].Weight;
-                var bone2Weight = phyVertex.BoneWeights[1].Weight;
-                var bone1Joint = (ushort)phyVertex.BoneWeights[0].Joint;
-                var bone2Joint = (ushort)phyVertex.BoneWeights[1].Joint;
-                                                
-                //Write Joints
-                BinaryPrimitives.WriteUInt16LittleEndian(c3verticesBuffer.Slice(idx), (ushort)bone1Joint);
-                idx += 2;
-                BinaryPrimitives.WriteUInt16LittleEndian(c3verticesBuffer.Slice(idx), (ushort)bone2Joint);
-                idx += 2;
-                idx += 2;//Two 0 ushorts
-                idx += 2;
-
-                BinaryPrimitives.WriteSingleLittleEndian(c3verticesBuffer.Slice(idx), bone1Weight);
-                idx += 4;
-                BinaryPrimitives.WriteSingleLittleEndian(c3verticesBuffer.Slice(idx), bone2Weight);
-                idx += 4;
-                idx += 4;//Two 0 floats.
-                idx += 4;
+                c3vertBuff.Write(phyVertex.Position);
+                c3vertBuff.Write(phyVertex.U);
+                c3vertBuff.Write(phyVertex.V);
+                c3vertBuff.Write(new ushort[] { (ushort)phyVertex.BoneWeights[0].Joint, (ushort)phyVertex.BoneWeights[1].Joint, 0, 0 });
+                c3vertBuff.Write(new float[] { phyVertex.BoneWeights[0].Weight, phyVertex.BoneWeights[1].Weight, 0, 0 });
 
             }
-
             Buffer verticesBuffer = new()
             {
-                ByteLength = c3verticesBuffer.Length,
+                ByteLength = c3vertBuff.Count,
                 Name = "Vertices Buffer",
-                Uri = "data:application/gltf-buffer;base64," + Convert.ToBase64String(c3verticesBuffer)
+                Uri = "data:application/gltf-buffer;base64," + c3vertBuff.ToBase64()
             };
 
             BufferView verticesBuffView = new()
