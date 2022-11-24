@@ -254,6 +254,7 @@ namespace C3.Exports
 
 
             #region Skin
+            //The Skin is the same skin used for all the different meshes of this model. Multiple nodes will refer to this skin/skeleton
 
             var skinResults = BuildSkeletonSkin(bodyMesh, model.Animations[0], ref gltf);
             //Add skin to main node.
