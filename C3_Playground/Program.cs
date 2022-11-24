@@ -172,7 +172,7 @@ namespace C3_Playground
                 if (File.Exists(outputPath))
                     File.Delete(outputPath);
                 using (StreamWriter tw = new StreamWriter(File.OpenWrite(outputPath)))
-                    GLTF2Export.Export(model, texturePath, tw);
+                    new GLTF2Export().Export(model, texturePath, tw);
             }
         }
 
