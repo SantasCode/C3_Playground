@@ -270,7 +270,16 @@ namespace C3.Exports
             gltf.Nodes.Add(transformNode);
 
             #region Animation
-            BuildAnimation(bodyMesh.InitMatrix, "Pose", model.Animations[0], skinResults.JointNodeMap, ref gltf);
+            BuildAnimation(bodyMesh.InitMatrix, "Pose 1", model.Animations[0], skinResults.JointNodeMap, ref gltf);
+            foreach (var file in Directory.GetFiles(@"D:\Programming\Conquer\Clients\5165\c3\0002\000"))
+            {
+                C3Model newModel = new();
+                using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
+                    newModel = C3ModelLoader.Load(br);
+                string fileNAme = new FileInfo(file).Name;
+                if (newModel != null)
+                    BuildAnimation(bodyMesh.InitMatrix, fileNAme, newModel.Animations[0], skinResults.JointNodeMap, ref gltf);
+            }
             #endregion Animation
 
             #region Indices
