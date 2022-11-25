@@ -240,16 +240,16 @@ namespace C3.Exports
                 return;
             }
 
-            EnsureNodes();
-            EnsureAccessors();
-            EnsureBuffers();
-            EnsureBufferViews();
-            EnsureMeshes();
-            EnsureMaterials();
-            EnsureTextures();
-            EnsureImages();
-            EnsureScenes();
-
+            if (gltf.Nodes == null) gltf.Nodes = new();
+            if (gltf.Accessors == null) gltf.Accessors= new();
+            if (gltf.Buffers == null) gltf.Buffers = new();
+            if (gltf.BufferViews == null) gltf.BufferViews = new();
+            if (gltf.Meshes == null) gltf.Meshes = new();
+            if (gltf.Materials == null) gltf.Materials= new();
+            if (gltf.Textures == null) gltf.Textures = new();
+            if (gltf.Images == null) gltf.Images = new();
+            if (gltf.Scenes == null) gltf.Scenes = new();
+            
             #region Skin
             //The Skin is the same skin used for all the different meshes of this model. Multiple nodes will refer to this skin/skeleton
 
@@ -267,7 +267,6 @@ namespace C3.Exports
 
             Node transformNode = new()
             {
-                //Matrix = bodyMesh.InitMatrix.ToArray(),
                 Name = "initial transform",
                 Children = new() { skinResults.Skin.Skeleton }
             };
@@ -487,22 +486,22 @@ namespace C3.Exports
         }
         private BuildSkinResults BuildSkeletonSkin(C3Phy mesh, C3Motion motion)
         {
-            EnsureNodes();
-            EnsureSkins();
+            if(gltf.Nodes == null) gltf.Nodes = new();
+            if (gltf.Skins == null) gltf.Skins = new();
 
             Node commonRoot = new()
             {
                 Name = "skeleton",
                 Children = new(),
             };
-            gltf.Nodes!.Add(commonRoot);
+            gltf.Nodes.Add(commonRoot);
 
 
             Dictionary<string, Node> jointNodeMap = new();
 
             #region Skin
             Skin skin = new() { Joints = new(), Skeleton = commonRoot };
-            gltf.Skins!.Add(skin);
+            gltf.Skins.Add(skin);
 
             
             //Populate the ibm with the matricies from unnamed bones.
@@ -539,11 +538,11 @@ namespace C3.Exports
         
         private void BuildAnimation(Matrix initMatrix, string name, C3Motion motion, ReadOnlyDictionary<string, Node> boneNodeMap)
         {
-            EnsureNodes();
-            EnsureAccessors();
-            EnsureAnimations();
-            EnsureBuffers();
-            EnsureBufferViews();
+            if (gltf.Nodes == null) gltf.Nodes = new();
+            if (gltf.Accessors == null) gltf.Accessors = new();
+            if (gltf.Animations == null) gltf.Animations = new();
+            if(gltf.Buffers == null) gltf.Buffers = new();
+            if (gltf.BufferViews == null) gltf.BufferViews = new();
                 
             int byteStride =12 + 12 + 16;//float, vec3, vec3, vec 4
             int totalBytes = (byteStride * (int)motion.BoneCount + 4)* motion.BoneKeyFrames.Count() ;
@@ -554,7 +553,7 @@ namespace C3.Exports
             DynamicByteBuffer animBufffer = new(totalBytes);
 
             Buffer buffer = new() { ByteLength = totalBytes };
-            gltf.Buffers!.Add(buffer);
+            gltf.Buffers.Add(buffer);
 
             Animation animation = new() 
             {
@@ -562,7 +561,7 @@ namespace C3.Exports
                 Samplers = new(),
                 Name = name,
             };
-            gltf.Animations!.Add(animation);
+            gltf.Animations.Add(animation);
 
             //Assumptions - need to test before reducing footprint of bytebuffer.
             //KKEY can have scale, rotation, and translation
@@ -592,7 +591,7 @@ namespace C3.Exports
                 Name = $"frame time",
                 ByteLength = 4 * motion.BoneKeyFrames.Count()
             };
-            gltf.BufferViews!.Add(timeBuffView);
+            gltf.BufferViews.Add(timeBuffView);
 
             Accessor timeAccessor = new()
                 {
@@ -604,7 +603,7 @@ namespace C3.Exports
                     Min = new() { minTime},
                     Max = new() { maxTime}
             };
-            gltf.Accessors!.Add(timeAccessor);
+            gltf.Accessors.Add(timeAccessor);
 
 
             for (int boneIdx = 0; boneIdx < motion.BoneCount; boneIdx++) 
@@ -713,7 +712,7 @@ namespace C3.Exports
                 foreach (var keyFrame in motion.BoneKeyFrames)
                 {
                     Matrix m = Matrix.Multiply(initMatrix, keyFrame.Matricies[boneIdx]);
-                    //Matrix m = keyFrame.Matricies[boneIdx];
+
                     m.Transpose().DecomposeCM(out var translation, out var rotation, out var scale);
 
                     animBufffer.Write(scale);
@@ -752,52 +751,6 @@ namespace C3.Exports
                 if (phyVertex.V < minUV.Y) minUV.Y = phyVertex.V;
             }
             return (max, min, maxUV, minUV);
-        }
-
-
-        private void EnsureNodes()
-        {
-            if (gltf.Nodes == null) gltf.Nodes = new();
-        }
-        private void EnsureAccessors()
-        {
-            if (gltf.Accessors == null) gltf.Accessors = new();
-        }
-        private void EnsureBuffers()
-        {
-            if (gltf.Buffers == null) gltf.Buffers = new();
-        }
-        private void EnsureBufferViews()
-        {
-            if (gltf.BufferViews == null) gltf.BufferViews = new();
-        }
-        private void EnsureMeshes()
-        {
-            if (gltf.Meshes == null) gltf.Meshes = new();
-        }
-        private void EnsureImages()
-        {
-            if (gltf.Images == null) gltf.Images = new();
-        }
-        private void EnsureMaterials()
-        {
-            if (gltf.Materials == null) gltf.Materials = new();
-        }
-        private void EnsureTextures()
-        {
-            if (gltf.Textures == null) gltf.Textures = new();
-        }
-        private void EnsureScenes()
-        {
-            if (gltf.Scenes == null) gltf.Scenes = new();
-        }
-        private void EnsureAnimations()
-        {
-            if (gltf.Animations == null) gltf.Animations = new();
-        }
-        private void EnsureSkins()
-        {
-            if (gltf.Skins == null) gltf.Skins = new();
         }
     }
 }

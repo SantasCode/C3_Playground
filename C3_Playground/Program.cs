@@ -1,4 +1,5 @@
 ﻿using C3;
+using C3.Core;
 using C3.Exports;
 using C3.IniFiles.FileSet;
 using C3_Playground.CommandAttributes;
@@ -111,6 +112,37 @@ namespace C3_Playground
                         Console.WriteLine($"PTCL CAME Mismatch - {file}");
                     if (model.Effects.Count > 0)
                         Console.WriteLine($"Has Effects - {file}");
+
+                }
+            }
+            Console.WriteLine($"Finished reading {count} c3 files");
+        }
+        [Command("test-matrices")]
+        public void C3_TestLoadMatrices([Argument][DirectoryExists] string fileDir, [Option('v')] bool verbose = false)
+        {
+            int count = 0;
+            foreach (var file in Directory.GetFiles(fileDir, "*.c3", SearchOption.AllDirectories))
+            {
+                count++;
+                using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
+                {
+
+                    C3Model? model = C3ModelLoader.Load(br, verbose);
+                    if (model == null)
+                    {
+                        Console.WriteLine($"null model file - {file}");
+                        continue;
+                    }
+
+                    if (model.Meshs.Count > 0)
+                    {
+                        foreach(var mesh in model.Meshs)
+                        {
+                            if (!Matrix.Identity.Equals(mesh.InitMatrix))
+                                Console.WriteLine($"InitMatrix is not identity: {mesh.Name} - {file}");
+
+                        }
+                    }
 
                 }
             }
