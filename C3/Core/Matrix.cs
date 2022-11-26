@@ -396,5 +396,123 @@ namespace C3.Core
 
             return ret;
         }
+
+        /// <summary>
+        /// Creates a new <see cref="Matrix"/> which contains inversion of the specified matrix. 
+        /// </summary>
+        /// <param name="matrix">Source <see cref="Matrix"/>.</param>
+        /// <returns>The inverted matrix.</returns>
+        public static Matrix Invert(Matrix matrix)
+        {
+            Matrix result;
+            Invert(ref matrix, out result);
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Matrix"/> which contains inversion of the specified matrix. 
+        /// </summary>
+        /// <param name="matrix">Source <see cref="Matrix"/>.</param>
+        /// <param name="result">The inverted matrix as output parameter.</param>
+        public static void Invert(ref Matrix matrix, out Matrix result)
+        {
+            result = new();
+            float num1 = matrix.M11;
+            float num2 = matrix.M12;
+            float num3 = matrix.M13;
+            float num4 = matrix.M14;
+            float num5 = matrix.M21;
+            float num6 = matrix.M22;
+            float num7 = matrix.M23;
+            float num8 = matrix.M24;
+            float num9 = matrix.M31;
+            float num10 = matrix.M32;
+            float num11 = matrix.M33;
+            float num12 = matrix.M34;
+            float num13 = matrix.M41;
+            float num14 = matrix.M42;
+            float num15 = matrix.M43;
+            float num16 = matrix.M44;
+            float num17 = (float)((double)num11 * (double)num16 - (double)num12 * (double)num15);
+            float num18 = (float)((double)num10 * (double)num16 - (double)num12 * (double)num14);
+            float num19 = (float)((double)num10 * (double)num15 - (double)num11 * (double)num14);
+            float num20 = (float)((double)num9 * (double)num16 - (double)num12 * (double)num13);
+            float num21 = (float)((double)num9 * (double)num15 - (double)num11 * (double)num13);
+            float num22 = (float)((double)num9 * (double)num14 - (double)num10 * (double)num13);
+            float num23 = (float)((double)num6 * (double)num17 - (double)num7 * (double)num18 + (double)num8 * (double)num19);
+            float num24 = (float)-((double)num5 * (double)num17 - (double)num7 * (double)num20 + (double)num8 * (double)num21);
+            float num25 = (float)((double)num5 * (double)num18 - (double)num6 * (double)num20 + (double)num8 * (double)num22);
+            float num26 = (float)-((double)num5 * (double)num19 - (double)num6 * (double)num21 + (double)num7 * (double)num22);
+            float num27 = (float)(1.0 / ((double)num1 * (double)num23 + (double)num2 * (double)num24 + (double)num3 * (double)num25 + (double)num4 * (double)num26));
+
+            result.M11 = num23 * num27;
+            result.M21 = num24 * num27;
+            result.M31 = num25 * num27;
+            result.M41 = num26 * num27;
+            result.M12 = (float)-((double)num2 * (double)num17 - (double)num3 * (double)num18 + (double)num4 * (double)num19) * num27;
+            result.M22 = (float)((double)num1 * (double)num17 - (double)num3 * (double)num20 + (double)num4 * (double)num21) * num27;
+            result.M32 = (float)-((double)num1 * (double)num18 - (double)num2 * (double)num20 + (double)num4 * (double)num22) * num27;
+            result.M42 = (float)((double)num1 * (double)num19 - (double)num2 * (double)num21 + (double)num3 * (double)num22) * num27;
+            float num28 = (float)((double)num7 * (double)num16 - (double)num8 * (double)num15);
+            float num29 = (float)((double)num6 * (double)num16 - (double)num8 * (double)num14);
+            float num30 = (float)((double)num6 * (double)num15 - (double)num7 * (double)num14);
+            float num31 = (float)((double)num5 * (double)num16 - (double)num8 * (double)num13);
+            float num32 = (float)((double)num5 * (double)num15 - (double)num7 * (double)num13);
+            float num33 = (float)((double)num5 * (double)num14 - (double)num6 * (double)num13);
+            result.M13 = (float)((double)num2 * (double)num28 - (double)num3 * (double)num29 + (double)num4 * (double)num30) * num27;
+            result.M23 = (float)-((double)num1 * (double)num28 - (double)num3 * (double)num31 + (double)num4 * (double)num32) * num27;
+            result.M33 = (float)((double)num1 * (double)num29 - (double)num2 * (double)num31 + (double)num4 * (double)num33) * num27;
+            result.M43 = (float)-((double)num1 * (double)num30 - (double)num2 * (double)num32 + (double)num3 * (double)num33) * num27;
+            float num34 = (float)((double)num7 * (double)num12 - (double)num8 * (double)num11);
+            float num35 = (float)((double)num6 * (double)num12 - (double)num8 * (double)num10);
+            float num36 = (float)((double)num6 * (double)num11 - (double)num7 * (double)num10);
+            float num37 = (float)((double)num5 * (double)num12 - (double)num8 * (double)num9);
+            float num38 = (float)((double)num5 * (double)num11 - (double)num7 * (double)num9);
+            float num39 = (float)((double)num5 * (double)num10 - (double)num6 * (double)num9);
+            result.M14 = (float)-((double)num2 * (double)num34 - (double)num3 * (double)num35 + (double)num4 * (double)num36) * num27;
+            result.M24 = (float)((double)num1 * (double)num34 - (double)num3 * (double)num37 + (double)num4 * (double)num38) * num27;
+            result.M34 = (float)-((double)num1 * (double)num35 - (double)num2 * (double)num37 + (double)num4 * (double)num39) * num27;
+            result.M44 = (float)((double)num1 * (double)num36 - (double)num2 * (double)num38 + (double)num3 * (double)num39) * num27;
+
+
+            /*
+			
+			
+            ///
+            // Use Laplace expansion theorem to calculate the inverse of a 4x4 matrix
+            // 
+            // 1. Calculate the 2x2 determinants needed the 4x4 determinant based on the 2x2 determinants 
+            // 3. Create the adjugate matrix, which satisfies: A * adj(A) = det(A) * I
+            // 4. Divide adjugate matrix with the determinant to find the inverse
+            
+            float det1, det2, det3, det4, det5, det6, det7, det8, det9, det10, det11, det12;
+            float detMatrix;
+            FindDeterminants(ref matrix, out detMatrix, out det1, out det2, out det3, out det4, out det5, out det6, 
+                             out det7, out det8, out det9, out det10, out det11, out det12);
+            
+            float invDetMatrix = 1f / detMatrix;
+            
+            Matrix ret; // Allow for matrix and result to point to the same structure
+            
+            ret.M11 = (matrix.M22*det12 - matrix.M23*det11 + matrix.M24*det10) * invDetMatrix;
+            ret.M12 = (-matrix.M12*det12 + matrix.M13*det11 - matrix.M14*det10) * invDetMatrix;
+            ret.M13 = (matrix.M42*det6 - matrix.M43*det5 + matrix.M44*det4) * invDetMatrix;
+            ret.M14 = (-matrix.M32*det6 + matrix.M33*det5 - matrix.M34*det4) * invDetMatrix;
+            ret.M21 = (-matrix.M21*det12 + matrix.M23*det9 - matrix.M24*det8) * invDetMatrix;
+            ret.M22 = (matrix.M11*det12 - matrix.M13*det9 + matrix.M14*det8) * invDetMatrix;
+            ret.M23 = (-matrix.M41*det6 + matrix.M43*det3 - matrix.M44*det2) * invDetMatrix;
+            ret.M24 = (matrix.M31*det6 - matrix.M33*det3 + matrix.M34*det2) * invDetMatrix;
+            ret.M31 = (matrix.M21*det11 - matrix.M22*det9 + matrix.M24*det7) * invDetMatrix;
+            ret.M32 = (-matrix.M11*det11 + matrix.M12*det9 - matrix.M14*det7) * invDetMatrix;
+            ret.M33 = (matrix.M41*det5 - matrix.M42*det3 + matrix.M44*det1) * invDetMatrix;
+            ret.M34 = (-matrix.M31*det5 + matrix.M32*det3 - matrix.M34*det1) * invDetMatrix;
+            ret.M41 = (-matrix.M21*det10 + matrix.M22*det8 - matrix.M23*det7) * invDetMatrix;
+            ret.M42 = (matrix.M11*det10 - matrix.M12*det8 + matrix.M13*det7) * invDetMatrix;
+            ret.M43 = (-matrix.M41*det4 + matrix.M42*det2 - matrix.M43*det1) * invDetMatrix;
+            ret.M44 = (matrix.M31*det4 - matrix.M32*det2 + matrix.M33*det1) * invDetMatrix;
+            
+            result = ret;
+            */
+        }
     }
 }
