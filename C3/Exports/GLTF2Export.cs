@@ -259,7 +259,8 @@ namespace C3.Exports
             };
             gltf.Nodes.Add(skinnedMeshNode);
 
-            var skinResults = BuildSkeletonSkin(bodyMesh, model.Animations[0]);
+            var bodyMeshIdx = model.Meshs.IndexOf(bodyMesh);
+            var skinResults = BuildSkeletonSkin(bodyMesh, model.Animations[bodyMeshIdx]);
             //Add skin to main node.
             skinnedMeshNode.Skin = skinResults.Skin;
 
@@ -281,7 +282,7 @@ namespace C3.Exports
                     newModel = C3ModelLoader.Load(br);
                 string fileNAme = new FileInfo(file).Name;
                 if (newModel != null)
-                    BuildAnimation(bodyMesh.InitMatrix, fileNAme, newModel.Animations[0], skinResults.JointNodeMap);
+                    BuildAnimation(bodyMesh.InitMatrix, fileNAme, newModel.Animations[bodyMeshIdx], skinResults.JointNodeMap);
             }
             #endregion Animation
 
