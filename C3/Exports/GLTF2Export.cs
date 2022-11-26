@@ -83,6 +83,14 @@ namespace C3.Exports
             #endregion Animation
 
             #region Geometry
+            /* Vertex info struct
+             * struct[44]{
+             *  [0] Vector3 Position
+             *  [12] Vector2 UV
+             *  [20] ushort[4] Joint
+             *  [28]float[4] Weight
+             *}
+             */
             var vectorBufferSize = (bodyMesh.Vertices.Length * 11 * 4);
             var geoBufferSize = vectorBufferSize + bodyMesh.Indices.Count() * sizeof(ushort);//Index array size
 
@@ -97,17 +105,6 @@ namespace C3.Exports
 
             //Calculate the new bounding box.
             (var max, var min, var maxUV, var minUV) = GetBoundingBox(bodyMesh.Vertices);
-            
-
-            /* Vertex info struct
-             * struct[44]{
-             *  [0] Vector3 Position
-             *  [12] Vector2 UV
-             *  [20] ushort[4] Joint
-             *  [28]float[4] Weight
-             *}
-             */
-            DynamicByteBuffer c3vertBuff = new(bodyMesh.Vertices.Length * 11 * 4);
 
             //Copy vertices to buffer.
             foreach (var phyVertex in bodyMesh.Vertices)
