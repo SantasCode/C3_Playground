@@ -20,33 +20,12 @@
             return (float)Math.Sqrt(X* X + Y * Y + Z * Z);
         }
 
-        /// <summary>
-        /// Creates a new <see cref="Vector3"/> that contains a transformation of 3d-vector by the specified <see cref="Matrix"/>.
-        /// </summary>
-        /// <param name="position">Source <see cref="Vector3"/>.</param>
-        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
-        /// <returns>Transformed <see cref="Vector3"/>.</returns>
-        public static Vector3 Transform(Vector3 position, Matrix matrix)
+        public Vector3 Transform(Matrix matrix)
         {
-            Transform(ref position, ref matrix, out position);
-            return position;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Vector3"/> that contains a transformation of 3d-vector by the specified <see cref="Matrix"/>.
-        /// </summary>
-        /// <param name="position">Source <see cref="Vector3"/>.</param>
-        /// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
-        /// <param name="result">Transformed <see cref="Vector3"/> as an output parameter.</param>
-        public static void Transform(ref Vector3 position, ref Matrix matrix, out Vector3 result)
-        {
-            result = new();
-            var x = (position.X * matrix.M11) + (position.Y * matrix.M21) + (position.Z * matrix.M31) + matrix.M41;
-            var y = (position.X * matrix.M12) + (position.Y * matrix.M22) + (position.Z * matrix.M32) + matrix.M42;
-            var z = (position.X * matrix.M13) + (position.Y * matrix.M23) + (position.Z * matrix.M33) + matrix.M43;
-            result.X = x;
-            result.Y = y;
-            result.Z = z;
+            var x = (X * matrix.M11) + (Y * matrix.M21) + (Z * matrix.M31) + matrix.M41;
+            var y = (X * matrix.M12) + (Y * matrix.M22) + (Z * matrix.M32) + matrix.M42;
+            var z = (X * matrix.M13) + (Y * matrix.M23) + (Z * matrix.M33) + matrix.M43;
+            return new(x, y, z);
         }
     }
 }
