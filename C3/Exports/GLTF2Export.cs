@@ -230,7 +230,7 @@ namespace C3.Exports
             };
             sw.Write(JsonSerializer.Serialize(gltf, jsonSerializerOptions));
         }
-        public void Export(C3Model model,string texturePath, StreamWriter sw)
+        public void Export(C3Model model, string texturePath, StreamWriter sw)
         {
             //If it doesn't have v_body, just export as a simple weapon/item.
             var bodyMesh = model.Meshs.Where(p => p.Name == "v_body").FirstOrDefault();
@@ -241,15 +241,15 @@ namespace C3.Exports
             }
 
             if (gltf.Nodes == null) gltf.Nodes = new();
-            if (gltf.Accessors == null) gltf.Accessors= new();
+            if (gltf.Accessors == null) gltf.Accessors = new();
             if (gltf.Buffers == null) gltf.Buffers = new();
             if (gltf.BufferViews == null) gltf.BufferViews = new();
             if (gltf.Meshes == null) gltf.Meshes = new();
-            if (gltf.Materials == null) gltf.Materials= new();
+            if (gltf.Materials == null) gltf.Materials = new();
             if (gltf.Textures == null) gltf.Textures = new();
             if (gltf.Images == null) gltf.Images = new();
             if (gltf.Scenes == null) gltf.Scenes = new();
-            
+
             #region Skin
             //The Skin is the same skin used for all the different meshes of this model. Multiple nodes will refer to this skin/skeleton
 
@@ -319,6 +319,12 @@ namespace C3.Exports
 
             #region Vertices
 
+            //Adjust for initial matrix.
+            foreach (var vertex in bodyMesh.Vertices)
+            {
+                vertex.Position = vertex.Position.Transform(bodyMesh.InitMatrix);
+            }
+
             (var max, var min, var maxUV, var minUV) = GetBoundingBox(bodyMesh.Vertices);
             /*
              * struct[44]{
@@ -338,7 +344,6 @@ namespace C3.Exports
                 c3vertBuff.Write(phyVertex.V);
                 c3vertBuff.Write(new ushort[] { (ushort)phyVertex.BoneWeights[0].Joint, (ushort)phyVertex.BoneWeights[1].Joint, 0, 0 });
                 c3vertBuff.Write(new float[] { phyVertex.BoneWeights[0].Weight, phyVertex.BoneWeights[1].Weight, 0, 0 });
-
             }
             Buffer verticesBuffer = new()
             {
@@ -712,8 +717,7 @@ namespace C3.Exports
 
                 foreach (var keyFrame in motion.BoneKeyFrames)
                 {
-                    Matrix m = Matrix.Multiply(initMatrix, keyFrame.Matricies[boneIdx]);
-
+                    Matrix m = keyFrame.Matricies[boneIdx];
                     m.Transpose().DecomposeCM(out var translation, out var rotation, out var scale);
 
                     animBufffer.Write(scale);
