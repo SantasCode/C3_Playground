@@ -71,59 +71,35 @@ namespace C3.Exports
 
             #region Animation
             AddAnimation("Pose 1", model.Animations[0], skinResults.JointNodeMap);
-            foreach (var file in Directory.GetFiles(@"D:\Programming\Conquer\Clients\5165\c3\0002\000"))
-            {
-                C3Model newModel = new();
-                using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
-                    newModel = C3ModelLoader.Load(br);
-                string fileName = new FileInfo(file).Name;
-                if (newModel != null)
-                    AddAnimation(fileName, newModel.Animations[bodyMeshIdx], skinResults.JointNodeMap);
-            }
+            //foreach (var file in Directory.GetFiles(@"D:\Programming\Conquer\Clients\5165\c3\0002\000"))
+            //{
+            //    C3Model newModel = new();
+            //    using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
+            //        newModel = C3ModelLoader.Load(br);
+            //    string fileName = new FileInfo(file).Name;
+            //    if (newModel != null)
+            //        AddAnimation(fileName, newModel.Animations[bodyMeshIdx], skinResults.JointNodeMap);
+            //}
             #endregion Animation
 
-            #region Indices
-            //Reverse the indices array for winding direction correction.
-            ReadOnlySpan<byte> indicesByteSpan = MemoryMarshal.Cast<ushort, byte>(new ReadOnlySpan<ushort>(bodyMesh.Indices.Reverse().ToArray()));
+            #region Geometry
+            var vectorBufferSize = (bodyMesh.Vertices.Length * 11 * 4);
+            var geoBufferSize = vectorBufferSize + bodyMesh.Indices.Count() * sizeof(ushort);//Index array size
 
-            Buffer indicesBuffer = new()
-            {
-                ByteLength = indicesByteSpan.Length,
-                Name = "Indices Bufffer",
-                Uri = "data:application/gltf-buffer;base64," + Convert.ToBase64String(indicesByteSpan)
-            };
+            DynamicByteBuffer c3geometryBuffer = new(geoBufferSize);
 
-            BufferView indicesBuffView = new()
-            {
-                Buffer = indicesBuffer,
-                ByteOffset = 0,
-                ByteLength = bodyMesh.Indices.Length * sizeof(ushort),
-                Target = BufferView.TargetEnum.ELEMENT_ARRAY_BUFFER
-            };
 
-            Accessor indicesAccessor = new()
-            {
-                BufferView = indicesBuffView,
-                ComponentType = Accessor.ComponentTypeEnum.UNSIGNED_SHORT,
-                Count = bodyMesh.Indices.Length,
-                Type = Accessor.TypeEnum.SCALAR,
-                Min = new() { (float)bodyMesh.Indices.Min() },
-                Max = new() { (float)bodyMesh.Indices.Max() },
-                Name = "indices accessor"
-            };
-            #endregion Indices
-
-            #region Vertices
-
-            //Adjust for initial matrix.
+            //Adjust vertices for initial matrix.
             foreach (var vertex in bodyMesh.Vertices)
             {
                 vertex.Position = vertex.Position.Transform(bodyMesh.InitMatrix);
             }
 
+            //Calculate the new bounding box.
             (var max, var min, var maxUV, var minUV) = GetBoundingBox(bodyMesh.Vertices);
             
-            /*
+
+            /* Vertex info struct
              * struct[44]{
              *  [0] Vector3 Position
              *  [12] Vector2 UV
@@ -133,25 +109,35 @@ namespace C3.Exports
              */
             DynamicByteBuffer c3vertBuff = new(bodyMesh.Vertices.Length * 11 * 4);
 
+            //Copy vertices to buffer.
             foreach (var phyVertex in bodyMesh.Vertices)
             {
-                c3vertBuff.Write(phyVertex.Position);
-                c3vertBuff.Write(phyVertex.U);
-                c3vertBuff.Write(phyVertex.V);
-                c3vertBuff.Write(new ushort[] { (ushort)phyVertex.BoneWeights[0].Joint, (ushort)phyVertex.BoneWeights[1].Joint, 0, 0 });
-                c3vertBuff.Write(new float[] { phyVertex.BoneWeights[0].Weight, phyVertex.BoneWeights[1].Weight, 0, 0 });
+                c3geometryBuffer.Write(phyVertex.Position);
+                c3geometryBuffer.Write(phyVertex.U);
+                c3geometryBuffer.Write(phyVertex.V);
+                c3geometryBuffer.Write(new ushort[] { (ushort)phyVertex.BoneWeights[0].Joint, (ushort)phyVertex.BoneWeights[1].Joint, 0, 0 });
+                c3geometryBuffer.Write(new float[] { phyVertex.BoneWeights[0].Weight, phyVertex.BoneWeights[1].Weight, 0, 0 });
             }
-            Buffer verticesBuffer = new()
+
+            //Copy indices to buffer.
+            //Reverse the indices array for winding direction correction.
+            ReadOnlySpan<byte> indicesByteSpan = MemoryMarshal.Cast<ushort, byte>(new ReadOnlySpan<ushort>(bodyMesh.Indices.Reverse().ToArray()));
+
+            c3geometryBuffer.Write(indicesByteSpan.ToArray());
+
+            //Setup geometry buffer
+            Buffer geometryBuffer = new()
             {
-                ByteLength = c3vertBuff.Count,
-                Name = "Vertices Buffer",
-                Uri = "data:application/gltf-buffer;base64," + c3vertBuff.ToBase64()
+                ByteLength = c3geometryBuffer.Count,
+                Name = "Geometry Buffer",
+                Uri = "data:application/gltf-buffer;base64," + c3geometryBuffer.ToBase64()
             };
 
+            //Setup vertex bufferviews and accessors.
             BufferView verticesBuffView = new()
             {
-                Buffer = verticesBuffer,
-                ByteLength = bodyMesh.Vertices.Length * 44, //3 floats per Vector3 + Vector2.
+                Buffer = geometryBuffer,
+                ByteLength = vectorBufferSize,
                 Target = BufferView.TargetEnum.ARRAY_BUFFER,
                 ByteStride = 44
             };
@@ -198,7 +184,27 @@ namespace C3.Exports
                 Type = Accessor.TypeEnum.VEC4,
                 Name = "weight accessor"
             };
-            #endregion Vertices
+
+            //Setup index bufferviews and accessors.
+            BufferView indicesBuffView = new()
+            {
+                Buffer = geometryBuffer,
+                ByteOffset = vectorBufferSize,
+                ByteLength = bodyMesh.Indices.Length * sizeof(ushort),
+                Target = BufferView.TargetEnum.ELEMENT_ARRAY_BUFFER
+            };
+
+            Accessor indicesAccessor = new()
+            {
+                BufferView = indicesBuffView,
+                ComponentType = Accessor.ComponentTypeEnum.UNSIGNED_SHORT,
+                Count = bodyMesh.Indices.Length,
+                Type = Accessor.TypeEnum.SCALAR,
+                Min = new() { (float)bodyMesh.Indices.Min() },
+                Max = new() { (float)bodyMesh.Indices.Max() },
+                Name = "indices accessor"
+            };
+            #endregion Geometry
 
             #region Texture
             byte[] imBytes = File.ReadAllBytes(texturePath);
@@ -268,7 +274,7 @@ namespace C3.Exports
 
             //Add components to top level collections.
 
-            gltf.Buffers.AddRange(new List<Buffer> { indicesBuffer, verticesBuffer });
+            gltf.Buffers.AddRange(new List<Buffer> { geometryBuffer });
             gltf.BufferViews.AddRange(new List<BufferView> { indicesBuffView, verticesBuffView });
             gltf.Accessors.AddRange(new List<Accessor> { indicesAccessor, verticesAccessor, uvAccessor, jointAccessor, weightAccessor });
 
