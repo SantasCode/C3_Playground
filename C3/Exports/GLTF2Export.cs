@@ -268,22 +268,23 @@ namespace C3.Exports
 
             Node transformNode = new()
             {
-                Name = "initial transform",
+                Name = "Z-up",
+                Rotation = new Quaternion(1, 0, 0, 1).Normalize().ToArray(),
                 Children = new() { skinResults.Skin.Skeleton }
             };
             gltf.Nodes.Add(transformNode);
 
             #region Animation
-            BuildAnimation(bodyMesh.InitMatrix, "Pose 1", model.Animations[0], skinResults.JointNodeMap);
-            foreach (var file in Directory.GetFiles(@"D:\Programming\Conquer\Clients\5165\c3\0002\000"))
-            {
-                C3Model newModel = new();
-                using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
-                    newModel = C3ModelLoader.Load(br);
-                string fileNAme = new FileInfo(file).Name;
-                if (newModel != null)
-                    BuildAnimation(bodyMesh.InitMatrix, fileNAme, newModel.Animations[bodyMeshIdx], skinResults.JointNodeMap);
-            }
+            //AddAnimation("Pose 1", model.Animations[0], skinResults.JointNodeMap);
+            //foreach (var file in Directory.GetFiles(@"D:\Programming\Conquer\Clients\5165\c3\0002\000"))
+            //{
+            //    C3Model newModel = new();
+            //    using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
+            //        newModel = C3ModelLoader.Load(br);
+            //    string fileName = new FileInfo(file).Name;
+            //    if (newModel != null)
+            //        AddAnimation(fileName, newModel.Animations[bodyMeshIdx], skinResults.JointNodeMap);
+            //}
             #endregion Animation
 
             #region Indices
@@ -326,6 +327,7 @@ namespace C3.Exports
             }
 
             (var max, var min, var maxUV, var minUV) = GetBoundingBox(bodyMesh.Vertices);
+            
             /*
              * struct[44]{
              *  [0] Vector3 Position
@@ -334,7 +336,6 @@ namespace C3.Exports
              *  [28]float[4] Weight
              *}
              */
-
             DynamicByteBuffer c3vertBuff = new(bodyMesh.Vertices.Length * 11 * 4);
 
             foreach (var phyVertex in bodyMesh.Vertices)
@@ -542,7 +543,7 @@ namespace C3.Exports
             return new BuildSkinResults() { Skin = skin, JointNodeMap = new(jointNodeMap) };
         }
         
-        private void BuildAnimation(Matrix initMatrix, string name, C3Motion motion, ReadOnlyDictionary<string, Node> boneNodeMap)
+        private void AddAnimation(string name, C3Motion motion, ReadOnlyDictionary<string, Node> boneNodeMap)
         {
             if (gltf.Nodes == null) gltf.Nodes = new();
             if (gltf.Accessors == null) gltf.Accessors = new();
