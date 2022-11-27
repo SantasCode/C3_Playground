@@ -6,6 +6,7 @@ using C3_Playground.CommandAttributes;
 using C3_Playground.Preview.Model;
 using Cocona;
 using System.Net.Http.Json;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 
@@ -113,6 +114,37 @@ namespace C3_Playground
                     if (model.Effects.Count > 0)
                         Console.WriteLine($"Has Effects - {file}");
 
+                }
+            }
+            Console.WriteLine($"Finished reading {count} c3 files");
+        }
+        [Command("test-vbody")]
+        public void C3_Testvbody([Argument][DirectoryExists] string fileDir, [Option('v')] bool verbose = false)
+        {
+            int count = 0;
+            GameData game = new GameData(fileDir);
+            var armors = game.GetArmorC3();
+            foreach (var armor in armors)
+            {
+                count++;
+                if (verbose) Console.WriteLine($"{armor}");
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Path.Combine(fileDir, armor))))
+                {
+
+                    C3Model? model = C3ModelLoader.Load(br, verbose);
+                    if (model == null)
+                    {
+                        Console.WriteLine($"null model file - {armor}");
+                        continue;
+                    }
+
+                    var body = model.Meshs.Where(p => p.Name.ToLower() == "v_body").FirstOrDefault();
+                    if (body == null)
+                        continue;
+
+                    //Has vbody.
+                    if (model.Meshs.Count < 4)
+                        Console.WriteLine($"Model has vbody with insuffecient parts. - {new FileInfo(armor).Name}");
                 }
             }
             Console.WriteLine($"Finished reading {count} c3 files");

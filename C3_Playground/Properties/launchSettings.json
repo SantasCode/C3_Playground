@@ -42,11 +42,11 @@
     },
     "export-gltf": {
       "commandName": "Project",
-      "commandLineArgs": "export-gltf \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\002000000.c3\" \"C:\\Temp\\Conquer\\002000000.png\" \"C:\\Temp\\Conquer\\002000000.gltf\""
+      "commandLineArgs": "export-gltf \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\" \"C:\\Temp\\Conquer\\001000000.png\" \"C:\\Temp\\Conquer\\001000000.gltf\""
     },
-    "test-matrices": {
+    "test-vbody": {
       "commandName": "Project",
-      "commandLineArgs": "test-matrices \"D:\\Programming\\Conquer\\Clients\\5579\\c3\""
+      "commandLineArgs": "test-vbody \"D:\\Programming\\Conquer\\Clients\\5165\""
     }
   }
 }
