@@ -608,7 +608,7 @@ namespace C3.Exports
 
                 animBuffer.Write(scale);
                 transDynamicBuffer.Write(translation);
-                rotationDynamicBuffer.Write(rotation);
+                rotationDynamicBuffer.Write(rotation.Normalize());
             }
             animBuffer.Write(transDynamicBuffer.ToArray());
             animBuffer.Write(rotationDynamicBuffer.ToArray());
