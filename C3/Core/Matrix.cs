@@ -306,8 +306,10 @@ namespace C3.Core
             _m1.M13 *= invSZ;
             _m1.M23 *= invSZ;
             _m1.M33 *= invSZ;
-
-            quaternion = Quaternion.SetFromRotationMatrix(_m1);
+            if (sx != 0 && sy != 0 && sz != 0)
+                quaternion = Quaternion.SetFromRotationMatrix(_m1);
+            else
+                quaternion = Quaternion.Identity;
 
             scale.X = sx;
             scale.Y = sy;
