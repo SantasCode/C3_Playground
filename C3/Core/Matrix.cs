@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Numerics;
+using System.Xml;
 using System.Xml.XPath;
 
 namespace C3.Core
@@ -209,6 +210,7 @@ namespace C3.Core
             scale.Y = ys * (float)Math.Sqrt(this.M21 * this.M21 + this.M22 * this.M22 + this.M23 * this.M23);
             scale.Z = zs * (float)Math.Sqrt(this.M31 * this.M31 + this.M32 * this.M32 + this.M33 * this.M33);
 
+
             if (scale.X == 0.0 || scale.Y == 0.0 || scale.Z == 0.0)
             {
                 rotation = Quaternion.Identity;
@@ -231,7 +233,7 @@ namespace C3.Core
         /// <param name="quaternion"></param>
         /// <param name="scale"></param>
         /// <returns></returns>
-        public static Matrix Compose(Vector3 position, Quaternion quaternion, Vector3 scale )
+        public static Matrix ComposeCM(Vector3 position, Quaternion quaternion, Vector3 scale )
         {
             Matrix m = new();
             float x = quaternion.X, y = quaternion.Y, z = quaternion.Z, w = quaternion.W;
@@ -263,6 +265,15 @@ namespace C3.Core
             m.M44 = 1;
 
             return m;
+        }
+
+        public static Matrix Compose(Vector3 scale, Quaternion rotation, Vector3 translation)
+        {
+            var sm = Matrix.CreateFromScale(scale);
+            var rm = Matrix.CreateFromQuaternion(rotation);
+            var tm = Matrix.CreateFromTranslation(translation);
+
+            return Matrix.Multiply(tm, Matrix.Multiply(rm, sm));
         }
         
         /// <summary>
