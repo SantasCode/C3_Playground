@@ -40,13 +40,13 @@
       "commandName": "Project",
       "commandLineArgs": "export-json \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\002000000.c3\" \"C:\\Temp\\Conquer\\2000000.json\""
     },
-    "export-gltf": {
-      "commandName": "Project",
-      "commandLineArgs": "export-gltf \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\" \"C:\\Temp\\Conquer\\001000000.dds\" \"C:\\Temp\\Conquer\\001000000.gltf\""
-    },
     "test-vbody": {
       "commandName": "Project",
       "commandLineArgs": "test-vbody \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "export-gltf2": {
+      "commandName": "Project",
+      "commandLineArgs": "export-gltf2 \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\" \"C:\\Temp\\Conquer\\001000000.png\" \"C:\\Temp\\Conquer\\Export\\001000000.gltf\""
     }
   }
 }
