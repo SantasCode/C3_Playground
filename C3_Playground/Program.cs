@@ -5,10 +5,13 @@ using C3.IniFiles.FileSet;
 using C3_Playground.CommandAttributes;
 using C3_Playground.Preview.Model;
 using Cocona;
+using Microsoft.Extensions.Logging;
+using System.Collections.ObjectModel;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Xml.Linq;
 
 namespace C3_Playground
 {
@@ -224,8 +227,9 @@ namespace C3_Playground
                     ObjExporter.Export(model, tw);
             }
         }
-        [Command("export-gltf")]
-        public void Export_gltf([Argument][FileExists] string filePath, [Argument][FileExists] string texturePath, [Argument] string outputPath)
+
+        [Command("export-gltf2")]
+        public void Export_gltf2([Argument][FileExists] string filePath, [Argument][FileExists] string texturePath, [Argument] string outputPath)
         {
             C3Model? model = null;
             using (BinaryReader br = new BinaryReader(File.OpenRead(filePath)))
@@ -235,8 +239,44 @@ namespace C3_Playground
             {
                 if (File.Exists(outputPath))
                     File.Delete(outputPath);
+                
+                var exporter = new GLTF2Export(ConsoleAppLogger.CreateLogger<Program>());
+
+                exporter.AddBody(model, texturePath);
+                exporter.AddAnimation("pose 1", model);
+
+                //C3Model? armorModel = null;
+                //using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\002131000.c3")))
+                //    armorModel = C3ModelLoader.Load(br);
+                //if (armorModel != null) 
+                //{
+                //    var armorPhy = armorModel.Meshs.Where(p => p.Name.ToLower() == "v_body").FirstOrDefault();
+                //    if (armorPhy != null)
+                //        exporter.AddToSocket("v_body", armorPhy, @"C:\Temp\Conquer\002131300.png");
+                //}
+
+                C3Model? weaponModel = null;
+                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410280.C3")))
+                    weaponModel = C3ModelLoader.Load(br);
+                if (weaponModel != null)
+                {
+                    var weaponPhy = weaponModel.Meshs[0];
+                    if (weaponPhy != null)
+                        exporter.AddToSocket("v_l_weapon", weaponPhy, @"C:\Temp\Conquer\410285.png");
+                }
+
+                foreach (var file in Directory.GetFiles(@"D:\Programming\Conquer\Clients\5165\c3\0001\410"))
+                {
+                    C3Model? newModel = new();
+                    using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
+                        newModel = C3ModelLoader.Load(br);
+                    string fileName = new FileInfo(file).Name;
+                    if (newModel != null)
+                        exporter.AddAnimation(fileName, newModel);
+                }
+
                 using (StreamWriter tw = new StreamWriter(File.OpenWrite(outputPath)))
-                    new GLTF2Export().Export(model, texturePath, tw);
+                    exporter.Export(tw);
             }
         }
 
