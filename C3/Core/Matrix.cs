@@ -145,6 +145,28 @@ namespace C3.Core
 
             return result;
         }
+        public static Matrix Testcompose(Vector3 s, Quaternion r, Vector3 t)
+        {
+            Matrix res = new();
+            res.M11 = (1.0f-2.0f*(r.Y* r.Y+r.Z* r.Z))*s.X;
+            res.M21 = (r.X* r.Y+r.Z* r.W)*s.X*2.0f;
+            res.M31 = (r.X* r.Z-r.Y* r.W)*s.X*2.0f;
+            res.M41 = 0.0f;
+            res.M12 = (r.X* r.Y-r.Z* r.W)*s.Y*2.0f;
+            res.M22 = (1.0f-2.0f*(r.X* r.X+r.Z* r.Z))*s.Y;
+            res.M32 = (r.Y* r.Z+r.X* r.W)*s.Y*2.0f;
+            res.M42 = 0.0f;
+            res.M13 = (r.X* r.Z+r.Y* r.W)*s.Z*2.0f;
+            res.M23 = (r.Y* r.Z-r.X* r.W)*s.Z*2.0f;
+            res.M33 = (1.0f-2.0f*(r.X* r.X+r.Y* r.Y))*s.Z;
+            res.M43 = 0.0f;
+            res.M14 = t.X;
+            res.M24 = t.Y;
+            res.M34 = t.Z;
+            res.M44 = 1.0f;
+
+            return res;
+        }
         public static Matrix quatToMatrix(Quaternion q)
         {
             Matrix res = Matrix.Identity;
