@@ -1,9 +1,11 @@
 ﻿using C3.Core;
 using C3.Elements;
 using C3.Exports.GLTF.Schema;
+using IniParser.Format;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Net.Sockets;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -115,21 +117,43 @@ namespace C3.Exports
                 socketNodes.Add(velementNode.Name, velementNode);
             }
         }
+        public void AddSimple(string name, C3Phy mesh, string? texturePath = null, bool skinned = false)
+        {
+            if (gltf.Nodes == null) gltf.Nodes = new();
+            if (gltf.Scenes == null) gltf.Scenes = new();
 
-        public void AddToSocket(string socket, C3Phy mesh, string? texturePath = null)
+            Node node = new()
+            {
+                Name = name
+            };
+
+            if (gltf.Scene == null)
+            {
+                Scene scene = new()
+                {
+                    Nodes = new()
+                    {
+                        node
+                    }
+                };
+                gltf.Scenes.Add(scene);
+                gltf.Scene = scene;
+            }
+            else if(gltf.Scene.Nodes == null)
+                gltf.Scene.Nodes = new() { node };
+            else
+                gltf.Scene.Nodes.Add(node);
+
+            gltf.Nodes.Add(node);  
+
+            AddSimple(node, mesh, texturePath, skinned);
+        }
+        private void AddSimple(Node socketNode, C3Phy mesh, string? texturePath = null, bool skinned = false)
         {
             if (gltf.Meshes == null) gltf.Meshes = new();
 
-            if (!socketNodes.ContainsKey(socket))
-            {
-                _logger.LogError("{socket} is not a valid socket name or no body has been set.", socket);
-                return;
-            }
-
-            var socketNode = socketNodes[socket];
-
             //If its v_body, it has a skin and will have joints/weights.
-            var geoResults = AddGeometry(mesh, socket == "v_body" ? true : false);
+            var geoResults = AddGeometry(mesh, skinned);
 
             MeshPrimitive meshPrimitive = new()
             {
@@ -140,33 +164,33 @@ namespace C3.Exports
                 },
                 Indices = geoResults.Indices
             };
-            
+
             if (geoResults.Joints != null)
                 meshPrimitive.Attributes.Add("JOINTS_0", geoResults.Joints);
             if (geoResults.Weights != null)
                 meshPrimitive.Attributes.Add("WEIGHTS_0", geoResults.Weights);
 
-            Mesh gltfMesh = new() { Primitives = new() { meshPrimitive }, Name = socket };
+            Mesh gltfMesh = new() { Primitives = new() { meshPrimitive }, Name = socketNode.Name };
 
-            var existingMesh = gltf.Meshes.Where(p=> p.Name == socket).FirstOrDefault();
+            var existingMesh = gltf.Meshes.Where(p => p.Name == socketNode.Name).FirstOrDefault();
             if (existingMesh != null)
             {
                 //Replace the existing mesh.
                 existingMesh.Primitives = gltfMesh.Primitives;
             }
-            else 
+            else
             {
                 gltf.Meshes.Add(gltfMesh);
                 socketNode.Mesh = gltfMesh;
             }
-            
+
             #region Texture
             //TODO - Remove existing texture/image/material when replacing a socket
             if (texturePath != null)
             {
-                if(gltf.Images == null) gltf.Images = new();
-                if(gltf.Textures == null) gltf.Textures = new();
-                if(gltf.Materials== null) gltf.Materials = new();
+                if (gltf.Images == null) gltf.Images = new();
+                if (gltf.Textures == null) gltf.Textures = new();
+                if (gltf.Materials == null) gltf.Materials = new();
 
                 byte[] imBytes = File.ReadAllBytes(texturePath);
                 Image image = new()
@@ -200,7 +224,21 @@ namespace C3.Exports
                 meshPrimitive.Material = material;
             }
             #endregion Texture
+        }
+        public void AddToSocket(string socket, C3Phy mesh, string? texturePath = null)
+        {
+            if (!socketNodes.ContainsKey(socket))
+            {
+                _logger.LogError("{socket} is not a valid socket name or no body has been set.", socket);
+                return;
+            }
 
+            var socketNode = socketNodes[socket];
+
+            //If its v_body, it has a skin and will have joints/weights.
+            bool skinned = socket == "v_body";
+
+            AddSimple(socketNode, mesh, texturePath, skinned);
         }
 
         public void AddAnimation(string name, C3Model model)
