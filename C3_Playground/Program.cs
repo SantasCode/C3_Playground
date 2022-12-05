@@ -1,12 +1,17 @@
 ﻿using C3;
+using C3.Core;
 using C3.Exports;
 using C3.IniFiles.FileSet;
 using C3_Playground.CommandAttributes;
 using C3_Playground.Preview.Model;
 using Cocona;
+using Microsoft.Extensions.Logging;
+using System.Collections.ObjectModel;
 using System.Net.Http.Json;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Xml.Linq;
 
 namespace C3_Playground
 {
@@ -116,6 +121,68 @@ namespace C3_Playground
             }
             Console.WriteLine($"Finished reading {count} c3 files");
         }
+        [Command("test-vbody")]
+        public void C3_Testvbody([Argument][DirectoryExists] string fileDir, [Option('v')] bool verbose = false)
+        {
+            int count = 0;
+            GameData game = new GameData(fileDir);
+            var armors = game.GetArmorC3();
+            foreach (var armor in armors)
+            {
+                count++;
+                if (verbose) Console.WriteLine($"{armor}");
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Path.Combine(fileDir, armor))))
+                {
+
+                    C3Model? model = C3ModelLoader.Load(br, verbose);
+                    if (model == null)
+                    {
+                        Console.WriteLine($"null model file - {armor}");
+                        continue;
+                    }
+
+                    var body = model.Meshs.Where(p => p.Name.ToLower() == "v_body").FirstOrDefault();
+                    if (body == null)
+                        continue;
+
+                    //Has vbody.
+                    if (model.Meshs.Count < 4)
+                        Console.WriteLine($"Model has vbody with insuffecient parts. - {new FileInfo(armor).Name}");
+                }
+            }
+            Console.WriteLine($"Finished reading {count} c3 files");
+        }
+        [Command("test-matrices")]
+        public void C3_TestLoadMatrices([Argument][DirectoryExists] string fileDir, [Option('v')] bool verbose = false)
+        {
+            int count = 0;
+            foreach (var file in Directory.GetFiles(fileDir, "*.c3", SearchOption.AllDirectories))
+            {
+                count++;
+                using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
+                {
+
+                    C3Model? model = C3ModelLoader.Load(br, verbose);
+                    if (model == null)
+                    {
+                        Console.WriteLine($"null model file - {file}");
+                        continue;
+                    }
+
+                    if (model.Meshs.Count > 0)
+                    {
+                        foreach(var mesh in model.Meshs)
+                        {
+                            if (!Matrix.Identity.Equals(mesh.InitMatrix))
+                                Console.WriteLine($"InitMatrix is not identity: {mesh.Name} - {file}");
+
+                        }
+                    }
+
+                }
+            }
+            Console.WriteLine($"Finished reading {count} c3 files");
+        }
 
         [Command("test-ini")]
         public void Ini_LoadTest([Argument][DirectoryExists] string clientDirectory)
@@ -158,6 +225,58 @@ namespace C3_Playground
                     File.Delete(outputPath);
                 using (TextWriter tw = new StreamWriter(File.OpenWrite(outputPath)))
                     ObjExporter.Export(model, tw);
+            }
+        }
+
+        [Command("export-gltf2")]
+        public void Export_gltf2([Argument][FileExists] string filePath, [Argument][FileExists] string texturePath, [Argument] string outputPath)
+        {
+            C3Model? model = null;
+            using (BinaryReader br = new BinaryReader(File.OpenRead(filePath)))
+                model = C3ModelLoader.Load(br);
+
+            if (model != null)
+            {
+                if (File.Exists(outputPath))
+                    File.Delete(outputPath);
+                
+                var exporter = new GLTF2Export(ConsoleAppLogger.CreateLogger<Program>());
+
+                exporter.AddBody(model, texturePath);
+                exporter.AddAnimation("pose 1", model);
+
+                //C3Model? armorModel = null;
+                //using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\002131000.c3")))
+                //    armorModel = C3ModelLoader.Load(br);
+                //if (armorModel != null) 
+                //{
+                //    var armorPhy = armorModel.Meshs.Where(p => p.Name.ToLower() == "v_body").FirstOrDefault();
+                //    if (armorPhy != null)
+                //        exporter.AddToSocket("v_body", armorPhy, @"C:\Temp\Conquer\002131300.png");
+                //}
+
+                C3Model? weaponModel = null;
+                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410280.C3")))
+                    weaponModel = C3ModelLoader.Load(br);
+                if (weaponModel != null)
+                {
+                    var weaponPhy = weaponModel.Meshs[0];
+                    if (weaponPhy != null)
+                        exporter.AddToSocket("v_l_weapon", weaponPhy, @"C:\Temp\Conquer\410285.png");
+                }
+
+                foreach (var file in Directory.GetFiles(@"D:\Programming\Conquer\Clients\5165\c3\0001\410"))
+                {
+                    C3Model? newModel = new();
+                    using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
+                        newModel = C3ModelLoader.Load(br);
+                    string fileName = new FileInfo(file).Name;
+                    if (newModel != null)
+                        exporter.AddAnimation(fileName, newModel);
+                }
+
+                using (StreamWriter tw = new StreamWriter(File.OpenWrite(outputPath)))
+                    exporter.Export(tw);
             }
         }
 

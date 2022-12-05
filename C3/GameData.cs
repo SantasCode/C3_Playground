@@ -1,6 +1,7 @@
 ﻿using C3.IniFiles.Entities;
 using C3.IniFiles.FileSet;
 using System.Net;
+using System.Security.Cryptography;
 using System.Threading;
 
 namespace C3
@@ -125,6 +126,23 @@ namespace C3
             }
 
             return monsters;
+        }
+        public List<string> GetArmorC3()
+        {
+            List<string> result = new();
+            var playerArmors = _fileSet.Armor.Where(p => p.Key / 1_000_000 <= 4).ToList();
+            foreach (var armor in playerArmors)
+            {
+                foreach(var part in armor.Value.Parts)
+                {
+                    if (TryGetObjAndTexture(part.MeshId, part.TextureId, out var val))
+                    {
+                        result.Add(val.Item1);
+                    }
+                }
+            }
+
+            return result;
         }
         public List<NPC> GetNpcs()
         {

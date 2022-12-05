@@ -73,7 +73,7 @@ namespace C3_Playground.Preview.Model
                                 M44 = m.M44
                             };
                             var rM = Matrix.Multiply(iM, fM);
-
+                            //var rM = fM;
                             if (!rM.Decompose(out _, out _, out _))
                                 Console.WriteLine("Unable to decompose motion matrix");
 
