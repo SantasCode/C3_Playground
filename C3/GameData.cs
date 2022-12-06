@@ -26,7 +26,8 @@ namespace C3
                     >= 130 and <= 137 => ItemType.Armor,
                     >= 181 and <= 191 => ItemType.Armor,
                     >= 410 and <= 490 => ItemType.OneHander,
-                    >= 500 and <= 580 => ItemType.TwoHander,
+                    500 => ItemType.Bow,
+                    >= 501 and <= 580 => ItemType.TwoHander,
                     601 => ItemType.OneHander,
                     900 => ItemType.Shield,
                     _ => ItemType.Other

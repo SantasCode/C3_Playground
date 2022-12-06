@@ -11,6 +11,7 @@ namespace C3.IniFiles.Entities
     {
         OneHander,
         TwoHander,
+        Bow,
         Shield,
         Armor,
         Helmet,
