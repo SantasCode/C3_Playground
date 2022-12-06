@@ -112,6 +112,14 @@ namespace C3.Exports
                 {
                     Name = element.Key
                 };
+
+                var m = element.Value.Item2.BoneKeyFrames[0].Matricies[0];
+                m.Decompose(out var scale, out var rotation, out var translation);
+
+                velementNode.Scale = scale.ToArray();
+                velementNode.Rotation = rotation.ToArray();
+                velementNode.Translation = translation.ToArray();
+
                 gltf.Nodes.Add(velementNode);
                 topLevel.Children.Add(velementNode);
                 socketNodes.Add(velementNode.Name, velementNode);
