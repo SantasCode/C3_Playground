@@ -202,7 +202,7 @@ namespace C3.Exports
                 Image image = new();
                 if (!externalTexture)
                 {
-                byte[] imBytes = File.ReadAllBytes(texturePath);
+                    byte[] imBytes = File.ReadAllBytes(texturePath);
                     image.Uri = "data:image/png;base64," + Convert.ToBase64String(imBytes);
                     image.Name = "Texture Image";
                 }
@@ -264,8 +264,8 @@ namespace C3.Exports
             else
             {
 
-            //If its v_body, it has a skin and will have joints/weights.
-            bool skinned = socket == "v_body";
+                //If its v_body, it has a skin and will have joints/weights.
+                bool skinned = socket == "v_body";
 
                 AddSimple(socketNode, mesh, texturePath, externalTexture, skinned);
             }

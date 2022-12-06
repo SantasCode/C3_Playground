@@ -46,7 +46,31 @@
     },
     "export-gltf2": {
       "commandName": "Project",
-      "commandLineArgs": "export-gltf2 \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\" \"C:\\Temp\\Conquer\\001000000.png\" \"C:\\Temp\\Conquer\\Export\\001000000.gltf\""
+      "commandLineArgs": "export-gltf2 \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\002000000.c3\" \"C:\\Temp\\Conquer\\002000000.png\" \"C:\\Temp\\Conquer\\Export\\002000000.gltf\""
+    },
+    "test-1h": {
+      "commandName": "Project",
+      "commandLineArgs": "test-1h \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "convert-dds": {
+      "commandName": "Project",
+      "commandLineArgs": "convert-dds \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\texture\\410036.dds\" \"C:\\Temp\\Conquer\\Export\\410036.png\""
+    },
+    "test-2h": {
+      "commandName": "Project",
+      "commandLineArgs": "test-2h \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "test-shield": {
+      "commandName": "Project",
+      "commandLineArgs": "test-shield \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "test-armet": {
+      "commandName": "Project",
+      "commandLineArgs": "test-armet \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "test-armor": {
+      "commandName": "Project",
+      "commandLineArgs": "test-armor \"D:\\Programming\\Conquer\\Clients\\5165\""
     }
   }
 }

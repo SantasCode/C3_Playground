@@ -287,7 +287,337 @@ namespace C3_Playground
                 //Export the texture, if it doesn't exist.
             }
         }
+        [Command("test-2h")]
+        public void Ini_Test2h([Argument][DirectoryExists] string clientDirectory)
+        {
+            GameData game = new GameData(clientDirectory);
+            var items = game.GetItems();
 
+            foreach (var item in items)
+            {
+                if (item.Type != C3.IniFiles.Entities.ItemType.TwoHander) continue;
+
+                if (item.BaseModel.Count > 1)
+                    Console.WriteLine("Multiple models");
+
+                var modelTexturePair = item.BaseModel[0];
+
+                C3Model? model = null;
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Path.Combine(clientDirectory, modelTexturePair.Item1))))
+                    model = C3ModelLoader.Load(br, false);
+
+                if (model == null) continue;
+
+
+                if (model.Animations.Count() > 1)
+                    Console.WriteLine($"2Hand model has more than 1 animation ({model.Animations.Count()}) - {item.Name}");
+
+                if (model.Animations[0].BoneCount > 1)
+                    Console.WriteLine($"2Hand model has more than 1 bone ({model.Animations[0].BoneCount}) - {item.Name}");
+
+
+                //We only care about 1 of the animation/mesh pairs.
+                var animation = model.Animations[0];
+
+
+                //Need to determine if the key frames are identical.
+                Matrix? m = null;
+                foreach (var frame in animation.BoneKeyFrames)
+                {
+                    if (m == null) m = frame.Matricies[0];
+                    else
+                    {
+                        if (!frame.Matricies[0].Equals(m))
+                            Console.WriteLine("Frames have different matricies - has some sort of animation");
+                    }
+                }
+
+                if (m == null)
+                {
+                    Console.WriteLine("Animation matrix is null");
+                }
+                else
+                {
+                    //Multiple the mesh initial matrix by the "animation initial matrix"
+                    model.Meshs[0].InitMatrix = Matrix.Multiply(model.Meshs[0].InitMatrix, m);
+                }
+
+                //Export the model, if it doesn't exist.
+                var exporter = new GLTF2Export(ConsoleAppLogger.CreateLogger<Program>());
+                string texturePath = @"C:\Temp\Conquer\Export\items\twohand\texture";
+                string modelPath = @"C:\Temp\Conquer\Export\items\twohand";
+
+                string meshId = new FileInfo(modelTexturePair.Item1).Name.Replace(new FileInfo(modelTexturePair.Item1).Extension, "");
+                string textureId = new FileInfo(modelTexturePair.Item2).Name.Replace(new FileInfo(modelTexturePair.Item2).Extension, "");
+
+                modelPath = Path.Combine(modelPath, $"{meshId}.gltf");
+                texturePath = Path.Combine(texturePath, $"{textureId}.png");
+
+                if (!File.Exists(modelPath))
+                {
+                    var relativePAth = Path.GetRelativePath(new FileInfo(modelPath).Directory.ToString(), texturePath);
+                    exporter.AddSimple("2h_weapon", model.Meshs[0], relativePAth, true, false);
+                    using (StreamWriter tw = new StreamWriter(File.OpenWrite(modelPath)))
+                        exporter.Export(tw);
+                }
+
+                if (!File.Exists(texturePath))
+                    PngExporter.Export(File.OpenRead(Path.Combine(clientDirectory, modelTexturePair.Item2)), File.OpenWrite(texturePath));
+                //Export the texture, if it doesn't exist.
+            }
+        }
+        [Command("test-shield")]
+        public void Ini_TestShield([Argument][DirectoryExists] string clientDirectory)
+        {
+            GameData game = new GameData(clientDirectory);
+            var items = game.GetItems();
+
+            foreach (var item in items)
+            {
+                if (item.Type != C3.IniFiles.Entities.ItemType.Shield) continue;
+
+                if (item.BaseModel.Count > 1)
+                    Console.WriteLine("Multiple models");
+
+                var modelTexturePair = item.BaseModel[0];
+
+                C3Model? model = null;
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Path.Combine(clientDirectory, modelTexturePair.Item1))))
+                    model = C3ModelLoader.Load(br, false);
+
+                if (model == null) continue;
+
+
+                if (model.Animations.Count() > 1)
+                    Console.WriteLine($"Shield model has more than 1 animation ({model.Animations.Count()}) - {item.Name}");
+
+                if (model.Animations[0].BoneCount > 1)
+                    Console.WriteLine($"shield model has more than 1 bone ({model.Animations[0].BoneCount}) - {item.Name}");
+
+
+                //We only care about 1 of the animation/mesh pairs.
+                var animation = model.Animations[0];
+
+
+                //Need to determine if the key frames are identical.
+                Matrix? m = null;
+                foreach (var frame in animation.BoneKeyFrames)
+                {
+                    if (m == null) m = frame.Matricies[0];
+                    else
+                    {
+                        if (!frame.Matricies[0].Equals(m))
+                            Console.WriteLine("Frames have different matricies - has some sort of animation");
+                    }
+                }
+
+                if (m == null)
+                {
+                    Console.WriteLine("Animation matrix is null");
+                }
+                else
+                {
+                    //Multiple the mesh initial matrix by the "animation initial matrix"
+                    model.Meshs[0].InitMatrix = Matrix.Multiply(model.Meshs[0].InitMatrix, m);
+                }
+
+                //Export the model, if it doesn't exist.
+                var exporter = new GLTF2Export(ConsoleAppLogger.CreateLogger<Program>());
+                string texturePath = @"C:\Temp\Conquer\Export\items\shield\texture";
+                string modelPath = @"C:\Temp\Conquer\Export\items\shield";
+
+                string meshId = new FileInfo(modelTexturePair.Item1).Name.Replace(new FileInfo(modelTexturePair.Item1).Extension, "");
+                string textureId = new FileInfo(modelTexturePair.Item2).Name.Replace(new FileInfo(modelTexturePair.Item2).Extension, "");
+
+                modelPath = Path.Combine(modelPath, $"{meshId}.gltf");
+                texturePath = Path.Combine(texturePath, $"{textureId}.png");
+
+                if (!File.Exists(modelPath))
+                {
+                    var relativePAth = Path.GetRelativePath(new FileInfo(modelPath).Directory.ToString(), texturePath);
+                    exporter.AddSimple("shield", model.Meshs[0], relativePAth, true, false);
+                    using (StreamWriter tw = new StreamWriter(File.OpenWrite(modelPath)))
+                        exporter.Export(tw);
+                }
+
+                if (!File.Exists(texturePath))
+                    PngExporter.Export(File.OpenRead(Path.Combine(clientDirectory, modelTexturePair.Item2)), File.OpenWrite(texturePath));
+                //Export the texture, if it doesn't exist.
+            }
+        }
+        [Command("test-armet")]
+        public void Ini_TestArmet([Argument][DirectoryExists] string clientDirectory)
+        {
+            GameData game = new GameData(clientDirectory);
+            var items = game.GetItems();
+
+            foreach (var item in items)
+            {
+                if (item.Type != C3.IniFiles.Entities.ItemType.Helmet) continue;
+
+                if (item.BaseModel.Count > 1)
+                    Console.WriteLine("Multiple models");
+
+                foreach (var baseModel in item.BaseModel)
+                {
+                    var modelTexturePair = baseModel.Value;
+
+                    C3Model? model = null;
+                    using (BinaryReader br = new BinaryReader(File.OpenRead(Path.Combine(clientDirectory, modelTexturePair.Item1))))
+                        model = C3ModelLoader.Load(br, false);
+
+                    if (model == null) continue;
+
+
+                    if (model.Animations.Count() > 1)
+                        Console.WriteLine($"armet model has more than 1 animation ({model.Animations.Count()}) - {item.Name}");
+
+                    if (model.Animations[0].BoneCount > 1)
+                        Console.WriteLine($"armet model has more than 1 bone ({model.Animations[0].BoneCount}) - {item.Name}");
+
+
+                    //We only care about 1 of the animation/mesh pairs.
+                    var animation = model.Animations[0];
+
+
+                    //Need to determine if the key frames are identical.
+                    Matrix? m = null;
+                    foreach (var frame in animation.BoneKeyFrames)
+                    {
+                        if (m == null) m = frame.Matricies[0];
+                        else
+                        {
+                            if (!frame.Matricies[0].Equals(m))
+                                Console.WriteLine("Frames have different matricies - has some sort of animation");
+                        }
+                    }
+
+                    if (m == null)
+                    {
+                        Console.WriteLine("Animation matrix is null");
+                    }
+                    else
+                    {
+                        //Multiple the mesh initial matrix by the "animation initial matrix"
+                        model.Meshs[0].InitMatrix = Matrix.Multiply(model.Meshs[0].InitMatrix, m);
+                    }
+
+                    //Export the model, if it doesn't exist.
+                    var exporter = new GLTF2Export(ConsoleAppLogger.CreateLogger<Program>());
+                    string texturePath = @"C:\Temp\Conquer\Export\items\armet\texture";
+                    string modelPath = @"C:\Temp\Conquer\Export\items\armet";
+
+                    string meshId = new FileInfo(modelTexturePair.Item1).Name.Replace(new FileInfo(modelTexturePair.Item1).Extension, "");
+                    string textureId = new FileInfo(modelTexturePair.Item2).Name.Replace(new FileInfo(modelTexturePair.Item2).Extension, "");
+
+                    modelPath = Path.Combine(modelPath, $"{meshId}.gltf");
+                    texturePath = Path.Combine(texturePath, $"{textureId}.png");
+
+                    if (!File.Exists(modelPath))
+                    {
+                        var relativePAth = Path.GetRelativePath(new FileInfo(modelPath).Directory.ToString(), texturePath);
+                        exporter.AddSimple("armet", model.Meshs[0], relativePAth, true, false);
+                        using (StreamWriter tw = new StreamWriter(File.OpenWrite(modelPath)))
+                            exporter.Export(tw);
+                    }
+
+                    if (!File.Exists(texturePath))
+                        PngExporter.Export(File.OpenRead(Path.Combine(clientDirectory, modelTexturePair.Item2)), File.OpenWrite(texturePath));
+                    //Export the texture, if it doesn't exist.
+                }
+            }
+        }
+        [Command("test-armor")]
+        public void Ini_TestArmor([Argument][DirectoryExists] string clientDirectory)
+        {
+            GameData game = new GameData(clientDirectory);
+            var items = game.GetItems();
+
+            foreach (var item in items)
+            {
+                if (item.Type != C3.IniFiles.Entities.ItemType.Armor) continue;
+
+                if (item.BaseModel.Count > 1)
+                    Console.WriteLine("Multiple models");
+
+                foreach (var baseModel in item.BaseModel)
+                {
+                    var modelTexturePair = baseModel.Value;
+
+                    C3Model? model = null;
+                    using (BinaryReader br = new BinaryReader(File.OpenRead(Path.Combine(clientDirectory, modelTexturePair.Item1))))
+                        model = C3ModelLoader.Load(br, false);
+
+                    if (model == null) continue;
+
+
+                    if (model.Animations.Count() > 1)
+                        Console.WriteLine($"armor model has more than 1 animation ({model.Animations.Count()}) - {item.Name}");
+
+                    if (model.Animations[0].BoneCount > 1)
+                        Console.WriteLine($"armor model has more than 1 bone ({model.Animations[0].BoneCount}) - {item.Name}");
+
+                    var bodyMesh = model.Meshs.Where(p => p.Name == "v_body").FirstOrDefault();
+
+                    if (bodyMesh == null)
+                    {
+                        Console.WriteLine("Failed to find v_body");
+                        continue;
+                    }
+
+                    int bodyIdx = model.Meshs.IndexOf(bodyMesh);
+
+                    //We only care about 1 of the animation/mesh pairs.
+                    var animation = model.Animations[bodyIdx];
+
+
+                    //Need to determine if the key frames are identical.
+                    Matrix? m = null;
+                    foreach (var frame in animation.BoneKeyFrames)
+                    {
+                        if (m == null) m = frame.Matricies[bodyIdx];
+                        else
+                        {
+                            if (!frame.Matricies[0].Equals(m))
+                                Console.WriteLine("Frames have different matricies - has some sort of animation");
+                        }
+                    }
+
+                    if (m == null)
+                    {
+                        Console.WriteLine("Animation matrix is null");
+                    }
+                    else
+                    {
+                        //Multiple the mesh initial matrix by the "animation initial matrix"
+                        model.Meshs[bodyIdx].InitMatrix = Matrix.Multiply(model.Meshs[bodyIdx].InitMatrix, m);
+                    }
+
+                    //Export the model, if it doesn't exist.
+                    var exporter = new GLTF2Export(ConsoleAppLogger.CreateLogger<Program>());
+                    string texturePath = @"C:\Temp\Conquer\Export\items\armor\texture";
+                    string modelPath = @"C:\Temp\Conquer\Export\items\armor";
+
+                    string meshId = new FileInfo(modelTexturePair.Item1).Name.Replace(new FileInfo(modelTexturePair.Item1).Extension, "");
+                    string textureId = new FileInfo(modelTexturePair.Item2).Name.Replace(new FileInfo(modelTexturePair.Item2).Extension, "");
+
+                    modelPath = Path.Combine(modelPath, $"{meshId}.gltf");
+                    texturePath = Path.Combine(texturePath, $"{textureId}.png");
+
+                    if (!File.Exists(modelPath))
+                    {
+                        var relativePAth = Path.GetRelativePath(new FileInfo(modelPath).Directory.ToString(), texturePath);
+                        exporter.AddSimple("armor", model.Meshs[bodyIdx], relativePAth, true, false);
+                        using (StreamWriter tw = new StreamWriter(File.OpenWrite(modelPath)))
+                            exporter.Export(tw);
+                    }
+
+                    if (!File.Exists(texturePath))
+                        PngExporter.Export(File.OpenRead(Path.Combine(clientDirectory, modelTexturePair.Item2)), File.OpenWrite(texturePath));
+                    //Export the texture, if it doesn't exist.
+                }
+            }
+        }
         [Command("export-obj")]
         public void Export_obj([Argument][FileExists] string filePath, [Argument] string outputPath)
         {
@@ -336,20 +666,36 @@ namespace C3_Playground
                     weaponModel = C3ModelLoader.Load(br);
                 if (weaponModel != null)
                 {
+                    //Figure out the initial matrix
+                    //Need to determine if the key frames are identical.
+                    Matrix? m = null;
+                    foreach (var frame in weaponModel.Animations[0].BoneKeyFrames)
+                    {
+                        if (m == null) m = frame.Matricies[0];
+                        else
+                        {
+                            if (!frame.Matricies[0].Equals(m))
+                                Console.WriteLine("Frames have different matricies - has some sort of animation");
+                        }
+                    }
+                    weaponModel.Meshs[0].InitMatrix = Matrix.Multiply(model.Meshs[0].InitMatrix, m);
                     var weaponPhy = weaponModel.Meshs[0];
                     if (weaponPhy != null)
+                    {
+                        exporter.AddToSocket("v_r_weapon", weaponPhy, @"C:\Temp\Conquer\410285.png");
                         exporter.AddToSocket("v_l_weapon", weaponPhy, @"C:\Temp\Conquer\410285.png");
+                    }
                 }
 
-                foreach (var file in Directory.GetFiles(@"D:\Programming\Conquer\Clients\5165\c3\0001\410"))
-                {
-                    C3Model? newModel = new();
-                    using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
-                        newModel = C3ModelLoader.Load(br);
-                    string fileName = new FileInfo(file).Name;
-                    if (newModel != null)
-                        exporter.AddAnimation(fileName, newModel);
-                }
+                //foreach (var file in Directory.GetFiles(@"D:\Programming\Conquer\Clients\5165\c3\0004\410"))
+                //{
+                //    C3Model? newModel = new();
+                //    using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
+                //        newModel = C3ModelLoader.Load(br);
+                //    string fileName = new FileInfo(file).Name;
+                //    if (newModel != null)
+                //        exporter.AddAnimation(fileName, newModel);
+                //}
 
                 using (StreamWriter tw = new StreamWriter(File.OpenWrite(outputPath)))
                     exporter.Export(tw);
