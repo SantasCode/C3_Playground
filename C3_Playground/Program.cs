@@ -211,6 +211,82 @@ namespace C3_Playground
                 }
             }
         }
+        [Command("convert-dds")]
+        public void ConvertToPng([Argument][FileExists] string inputTexture, [Argument] string outputPath)
+        {
+            PngExporter.Export(File.OpenRead(inputTexture), File.OpenWrite(outputPath));
+        }
+        [Command("test-1h")]
+        public void Ini_Test1h([Argument][DirectoryExists] string clientDirectory)
+        {
+            GameData game = new GameData(clientDirectory);
+            var items = game.GetItems();
+
+            foreach (var item in items)
+            {
+                if (item.Type != C3.IniFiles.Entities.ItemType.OneHander) continue;
+
+                if (item.BaseModel.Count > 1)
+                    Console.WriteLine("Multiple models");
+
+                var modelTexturePair = item.BaseModel[0];
+                
+                C3Model? model = null;
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Path.Combine(clientDirectory, modelTexturePair.Item1))))
+                    model = C3ModelLoader.Load(br, false);
+
+                if (model == null) continue;
+
+
+                //We only care about 1 of the animation/mesh pairs.
+                var animation = model.Animations[0];
+
+                //Need to determine if the key frames are identical.
+                Matrix? m = null;
+                foreach (var frame in animation.BoneKeyFrames)
+                {
+                    if (m == null) m = frame.Matricies[0];
+                    else
+                    {
+                        if (!frame.Matricies[0].Equals(m))
+                            Console.WriteLine("Frames have different matricies - has some sort of animation");
+                    }
+                }
+
+                if (m == null)
+                {
+                    Console.WriteLine("Animation matrix is null");
+                }
+                else
+                {
+                    //Multiple the mesh initial matrix by the "animation initial matrix"
+                    model.Meshs[0].InitMatrix = Matrix.Multiply(model.Meshs[0].InitMatrix, m);
+                }
+
+                //Export the model, if it doesn't exist.
+                var exporter = new GLTF2Export(ConsoleAppLogger.CreateLogger<Program>());
+                string texturePath = @"C:\Temp\Conquer\Export\items\onehand\texture";
+                string modelPath = @"C:\Temp\Conquer\Export\items\onehand";
+
+                string meshId = new FileInfo(modelTexturePair.Item1).Name.Replace(new FileInfo(modelTexturePair.Item1).Extension, "");
+                string textureId = new FileInfo(modelTexturePair.Item2).Name.Replace(new FileInfo(modelTexturePair.Item2).Extension, "");
+
+                modelPath = Path.Combine(modelPath, $"{meshId}.gltf");
+                texturePath = Path.Combine(texturePath, $"{textureId}.png");
+
+                if (!File.Exists(modelPath))
+                {
+                    var relativePAth = Path.GetRelativePath(new FileInfo(modelPath).Directory.ToString(), texturePath);
+                    exporter.AddSimple("1h_weapon", model.Meshs[0], relativePAth, true, false);
+                    using (StreamWriter tw = new StreamWriter(File.OpenWrite(modelPath)))
+                        exporter.Export(tw);
+                }
+
+                if (!File.Exists(texturePath))
+                    PngExporter.Export(File.OpenRead(Path.Combine(clientDirectory, modelTexturePair.Item2)), File.OpenWrite(texturePath));
+                //Export the texture, if it doesn't exist.
+            }
+        }
 
         [Command("export-obj")]
         public void Export_obj([Argument][FileExists] string filePath, [Argument] string outputPath)
