@@ -125,7 +125,7 @@ namespace C3.Exports
                 socketNodes.Add(velementNode.Name, velementNode);
             }
         }
-        public void AddSimple(string name, C3Phy mesh, string? texturePath = null, bool skinned = false)
+        public void AddSimple(string name, C3Phy mesh, string? texturePath = null, bool externalTexture = false, bool skinned = false)
         {
             if (gltf.Nodes == null) gltf.Nodes = new();
             if (gltf.Scenes == null) gltf.Scenes = new();
@@ -154,9 +154,9 @@ namespace C3.Exports
 
             gltf.Nodes.Add(node);  
 
-            AddSimple(node, mesh, texturePath, skinned);
+            AddSimple(node, mesh, texturePath, externalTexture, skinned);
         }
-        private void AddSimple(Node socketNode, C3Phy mesh, string? texturePath = null, bool skinned = false)
+        private void AddSimple(Node socketNode, C3Phy mesh, string? texturePath = null, bool externalTexture = false, bool skinned = false)
         {
             if (gltf.Meshes == null) gltf.Meshes = new();
 
@@ -199,13 +199,18 @@ namespace C3.Exports
                 if (gltf.Images == null) gltf.Images = new();
                 if (gltf.Textures == null) gltf.Textures = new();
                 if (gltf.Materials == null) gltf.Materials = new();
-
-                byte[] imBytes = File.ReadAllBytes(texturePath);
-                Image image = new()
+                Image image = new();
+                if (!externalTexture)
                 {
-                    Uri = "data:image/png;base64," + Convert.ToBase64String(imBytes),
-                    Name = "Texture Image"
-                };
+                byte[] imBytes = File.ReadAllBytes(texturePath);
+                    image.Uri = "data:image/png;base64," + Convert.ToBase64String(imBytes);
+                    image.Name = "Texture Image";
+                }
+                else
+                {
+                    image.Uri = texturePath;
+                    image.Name = "External texture";
+                }
 
                 Texture texture = new()
                 {
@@ -233,8 +238,10 @@ namespace C3.Exports
             }
             #endregion Texture
         }
-        public void AddToSocket(string socket, C3Phy mesh, string? texturePath = null)
+        public void AddToSocket(string socket, C3Phy mesh, string? texturePath = null, bool externalTexture = false)
         {
+            if (gltf.Nodes == null) gltf.Nodes = new();
+
             if (!socketNodes.ContainsKey(socket))
             {
                 _logger.LogError("{socket} is not a valid socket name or no body has been set.", socket);
@@ -242,11 +249,26 @@ namespace C3.Exports
             }
 
             var socketNode = socketNodes[socket];
+            if (socket != "v_body")
+            {
+                Node newNode = new()
+                {
+                    Name = socket + "_attach"
+                };
+                gltf.Nodes.Add(newNode);
+                if (socketNode.Children == null) socketNode.Children = new();
+
+                socketNode.Children.Add(newNode);
+                AddSimple(newNode, mesh, texturePath, externalTexture, false);
+            }
+            else
+            {
 
             //If its v_body, it has a skin and will have joints/weights.
             bool skinned = socket == "v_body";
 
-            AddSimple(socketNode, mesh, texturePath, skinned);
+                AddSimple(socketNode, mesh, texturePath, externalTexture, skinned);
+            }
         }
 
         public void AddAnimation(string name, C3Model model)
