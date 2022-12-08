@@ -38,7 +38,7 @@
     },
     "export-json": {
       "commandName": "Project",
-      "commandLineArgs": "export-json \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\002000000.c3\" \"C:\\Temp\\Conquer\\2000000.json\""
+      "commandLineArgs": "export-json \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\" \"C:\\Temp\\Conquer\\001000000.json\""
     },
     "test-vbody": {
       "commandName": "Project",
@@ -46,7 +46,7 @@
     },
     "export-gltf2": {
       "commandName": "Project",
-      "commandLineArgs": "export-gltf2 \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\002000000.c3\" \"C:\\Temp\\Conquer\\002000000.png\" \"C:\\Temp\\Conquer\\Export\\002000000.gltf\""
+      "commandLineArgs": "export-gltf2 \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\004000000.c3\" \"C:\\Temp\\Conquer\\004000000.png\" \"C:\\Temp\\Conquer\\Export\\004000000.gltf\""
     },
     "test-1h": {
       "commandName": "Project",

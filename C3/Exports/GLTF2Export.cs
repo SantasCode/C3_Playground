@@ -1,14 +1,9 @@
 ﻿using C3.Core;
 using C3.Elements;
 using C3.Exports.GLTF.Schema;
-using IniParser.Format;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Net.Sockets;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Buffer = C3.Exports.GLTF.Schema.Buffer;
@@ -38,7 +33,7 @@ namespace C3.Exports
         /// </summary>
         /// <param name="model"></param>
         /// <param name="bodyTexturePath"></param>
-        public void AddBody(C3Model model, string? bodyTexturePath = null)
+        public void AddBody(C3Model model, string? bodyTexturePath = null, bool externalTexture = false, bool includeChildren = true)
         {
             if (gltf.Nodes == null) gltf.Nodes = new();
             if(gltf.Scenes == null) gltf.Scenes = new();
@@ -100,8 +95,9 @@ namespace C3.Exports
             socketNodes.Add(vbodyNode.Name, vbodyNode);
 
             //Add the base mesh for vbody.
-            AddToSocket("v_body", vbodyPhy, bodyTexturePath);
+            AddToSocket("v_body", vbodyPhy, bodyTexturePath, externalTexture);
 
+            if (includeChildren == false) return;
 
             //Add nodes for other elements
             foreach(var element in Elements)
@@ -117,7 +113,7 @@ namespace C3.Exports
                 m.Decompose(out var scale, out var rotation, out var translation);
 
                 velementNode.Scale = scale.ToArray();
-                velementNode.Rotation = rotation.ToArray();
+                velementNode.Rotation = rotation.Normalize().ToArray();
                 velementNode.Translation = translation.ToArray();
 
                 gltf.Nodes.Add(velementNode);
@@ -125,6 +121,7 @@ namespace C3.Exports
                 socketNodes.Add(velementNode.Name, velementNode);
             }
         }
+
         public void AddSimple(string name, C3Phy mesh, string? texturePath = null, bool externalTexture = false, bool skinned = false)
         {
             if (gltf.Nodes == null) gltf.Nodes = new();
@@ -759,7 +756,7 @@ namespace C3.Exports
 
             var vbodyMoti = motion;
 
-            if (vbodyMoti.KeyFramesCount != 1) throw new NotSupportedException("v_body is expected to have 1 key frame");
+            if (vbodyMoti.KeyFramesCount != 1) Console.WriteLine("v_body is expected to have 1 key frame");
 
 
             for (int i = 0; i < vbodyMoti.BoneCount; i++)
