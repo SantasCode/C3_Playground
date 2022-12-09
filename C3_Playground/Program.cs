@@ -8,6 +8,7 @@ namespace C3_Playground
 {
     [HasSubCommands(typeof(Commands.Export))]
     [HasSubCommands(typeof(Commands.Test))]
+    [HasSubCommands(typeof(Commands.PreviewCommands), commandName:"preview")]
     class Program
     {
         static void Log(string message) => Console.WriteLine(message);
@@ -17,12 +18,6 @@ namespace C3_Playground
                 {
                     options.TreatPublicMethodsAsCommands = false;
                 });
-        }
-        [Command("preview")]
-        public void Preview([Argument][FileExists] string file = "", [Argument][FileExists] string textureFile = "", [Option('w')] int Width = 1024, [Option('h')] int Height = 768)
-        {
-            using (var game = new Preview.RenderWindow(file, textureFile, Width, Height))
-                game.Run();
         }
 
 

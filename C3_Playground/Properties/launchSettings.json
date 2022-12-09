@@ -6,7 +6,7 @@
     },
     "preview": {
       "commandName": "Project",
-      "commandLineArgs": "preview"
+      "commandLineArgs": "preview player 1024 768 -a \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\" -b \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\texture\\001000000.dds\" -h \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\hair\\001119055.C3\" -i \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\hair\\001119055.dds\" -w \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\410080.c3\" -x \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\texture\\410086.dds\" -s \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\420010.c3\" -t \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\texture\\420015.dds\" -m \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\1001\\000\\100.c3\" -p \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\Mount\\801\\8010000.C3\" -q \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\Mount\\801\\8010100.dds\" -r \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\Mount\\801\\100.C3\""
     },
     "export gltf2": {
       "commandName": "Project",
