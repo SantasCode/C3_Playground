@@ -92,6 +92,7 @@ namespace C3_Playground
                 Console.WriteLine($"MOTI-->Index: {i} Bone Count: {myModel.Animations[i].BoneCount}");
             }
         }
+
         [Command("test-meshes")]
         public void C3_TestLoadMeshes([Argument][DirectoryExists] string fileDir, [Option('v')] bool verbose = false)
         {
@@ -121,6 +122,7 @@ namespace C3_Playground
             }
             Console.WriteLine($"Finished reading {count} c3 files");
         }
+
         [Command("test-vbody")]
         public void C3_Testvbody([Argument][DirectoryExists] string fileDir, [Option('v')] bool verbose = false)
         {
@@ -152,6 +154,7 @@ namespace C3_Playground
             }
             Console.WriteLine($"Finished reading {count} c3 files");
         }
+
         [Command("test-matrices")]
         public void C3_TestLoadMatrices([Argument][DirectoryExists] string fileDir, [Option('v')] bool verbose = false)
         {
@@ -211,11 +214,13 @@ namespace C3_Playground
                 }
             }
         }
+
         [Command("convert-dds")]
         public void ConvertToPng([Argument][FileExists] string inputTexture, [Argument] string outputPath)
         {
             PngExporter.Export(File.OpenRead(inputTexture), File.OpenWrite(outputPath));
         }
+
         [Command("test-1h")]
         public void Ini_Test1h([Argument][DirectoryExists] string clientDirectory)
         {
@@ -287,6 +292,7 @@ namespace C3_Playground
                 //Export the texture, if it doesn't exist.
             }
         }
+
         [Command("test-2h")]
         public void Ini_Test2h([Argument][DirectoryExists] string clientDirectory)
         {
@@ -366,6 +372,7 @@ namespace C3_Playground
                 //Export the texture, if it doesn't exist.
             }
         }
+
         [Command("test-shield")]
         public void Ini_TestShield([Argument][DirectoryExists] string clientDirectory)
         {
