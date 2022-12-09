@@ -118,17 +118,26 @@ namespace C3_Playground.Preview
             }
             else if(true)
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\003000000.c3" : _modelFile)))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"C:\Program Files (x86)\Conquer Online\Conquer Online 3.0\c3\mesh\001194375.C3" : _modelFile)))
                     model = C3ModelLoader.Load(br);
 
-                DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\texture\003000000.dds" : _textureFile, GraphicsDevice, false, out modelTexture);
+                DDSLib.DDSFromFile(_textureFile == "" ? @"C:\Program Files (x86)\Conquer Online\Conquer Online 3.0\c3\texture\001194375.dds" : _textureFile, GraphicsDevice, false, out modelTexture);
                 bodyEffect.Texture = modelTexture;
 
-                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\480330.c3")))
-                    weaponLModel = C3ModelLoader.Load(br);
+                //using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\430210.c3")))
+                //    weaponLModel = C3ModelLoader.Load(br);
 
-                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\480335.dds", GraphicsDevice, false, out weaponLTexture);
-                weaponLEffect.Texture = weaponLTexture;
+                //DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\430215.dds", GraphicsDevice, false, out weaponLTexture);
+                //weaponLEffect.Texture = weaponLTexture;
+
+                //string animation = @"D:\Programming\Conquer\Clients\5165\c3\0002\410\100.C3";
+                //using (BinaryReader br = new BinaryReader(File.OpenRead(animation)))
+                //    modelAnimation = C3ModelLoader.Load(br);
+                //if (model != null && modelAnimation != null)
+                //{
+                //    Console.WriteLine("Replaced motion with motion file");
+                //    model.Animations = modelAnimation.Animations;
+                //}
             }
             else if (true) //Load a character w/ weapons and mount.
             {
@@ -174,13 +183,13 @@ namespace C3_Playground.Preview
 
 
                 ///Mount
-                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5579\c3\Mount\819\8190000.C3")))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5579\C3/Mount/802/8020000.C3")))
                     mountModel = C3ModelLoader.Load(br);
 
-                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5579\c3\Mount\819\8190000.dds", GraphicsDevice, false, out mountTexture);
+                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5579\C3/Mount/802/8020300.dds", GraphicsDevice, false, out mountTexture);
                 mountEffect.Texture = mountTexture;
 
-                string mountAnim = @"D:\Programming\Conquer\Clients\5579\c3\Mount\819\100.C3";
+                string mountAnim = @"D:\Programming\Conquer\Clients\5579\c3\Mount\802\713-1.C3";
                 using (BinaryReader br = new BinaryReader(File.OpenRead(mountAnim)))
                     mountAnimation = C3ModelLoader.Load(br);
                 if (mountModel != null && mountAnimation != null)

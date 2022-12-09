@@ -46,7 +46,7 @@
     },
     "export-gltf2": {
       "commandName": "Project",
-      "commandLineArgs": "export-gltf2 \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\004000000.c3\" \"C:\\Temp\\Conquer\\004000000.png\" \"C:\\Temp\\Conquer\\Export\\004000000.gltf\""
+      "commandLineArgs": "export-gltf2 \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\" \"C:\\Temp\\Conquer\\001000000.png\" \"C:\\Temp\\Conquer\\Export\\001000000.gltf\""
     },
     "test-1h": {
       "commandName": "Project",
@@ -71,6 +71,10 @@
     "test-armor": {
       "commandName": "Project",
       "commandLineArgs": "test-armor \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "test-hair": {
+      "commandName": "Project",
+      "commandLineArgs": "test-hair \"D:\\Programming\\Conquer\\Clients\\5165\""
     }
   }
 }
