@@ -211,6 +211,27 @@ namespace C3
             }
             return npcs;
         }
+
+        //Function is incomplete
+        private static int GetWeaponAction(int mainHand, int offHand)
+        {
+            if (offHand - 900000 <= 99999 || mainHand == 380)
+                return mainHand / 10000 + 700;
+            return offHand % 100000 / 10000 + 10 * (mainHand % 100000 / 10000) + 600;
+        }
+        //Returns 3dmotion.ini key for applicable animation.
+        private static ulong GetActionData(int bodyType, int leftHand, int rightHand, uint mountId, int actionType)
+        {
+            ulong mountAction = 0;
+            if (actionType == 713)
+                mountAction = (mountId / 10000) % 100 + (mountId % 100) * 100;
+            else
+                mountAction = (uint)(mountId / 10000 % 100);
+
+            int weaponAction = GetWeaponAction(leftHand, rightHand);
+
+            return mountAction * 10_000_000_000 + (ulong)bodyType * 10_000_000 + (ulong)weaponAction * 10_000 + (ulong)actionType;
+        }
         private bool TryGetObjAndTexture(ulong MeshId, ulong TextureId, out (string, string) value)
         {
             if (_fileSet._3DObjs.TryGetValue(MeshId, out string MeshPath))
