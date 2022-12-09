@@ -15,6 +15,7 @@ namespace C3.IniFiles.Entities
         Shield,
         Armor,
         Helmet,
+        Hair,
         Other
     }
     public class Item

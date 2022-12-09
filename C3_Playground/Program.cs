@@ -528,7 +528,90 @@ namespace C3_Playground
                 }
             }
         }
-        
+
+        [Command("test-hair")]
+        public void Ini_TestHair([Argument][DirectoryExists] string clientDirectory)
+        {
+            GameData game = new GameData(clientDirectory);
+            var items = game.GetHair();
+
+            foreach (var item in items)
+            {
+                if (item.Type != C3.IniFiles.Entities.ItemType.Hair) continue;
+
+                if (item.BaseModel.Count > 1)
+                    Console.WriteLine("[Hair] Multiple models");
+
+                foreach (var baseModel in item.BaseModel)
+                {
+                    var modelTexturePair = baseModel.Value;
+
+                    C3Model? model = null;
+                    using (BinaryReader br = new BinaryReader(File.OpenRead(Path.Combine(clientDirectory, modelTexturePair.Item1))))
+                        model = C3ModelLoader.Load(br, false);
+
+                    if (model == null) continue;
+
+
+                    if (model.Animations.Count() > 1)
+                        Console.WriteLine($"hair model has more than 1 animation ({model.Animations.Count()}) - {item.Name}");
+
+                    if (model.Animations[0].BoneCount > 1)
+                        Console.WriteLine($"hair model has more than 1 bone ({model.Animations[0].BoneCount}) - {item.Name}");
+
+
+                    //We only care about 1 of the animation/mesh pairs.
+                    var animation = model.Animations[0];
+
+
+                    //Need to determine if the key frames are identical.
+                    Matrix? m = null;
+                    foreach (var frame in animation.BoneKeyFrames)
+                    {
+                        if (m == null) m = frame.Matricies[0];
+                        else
+                        {
+                            if (!frame.Matricies[0].Equals(m))
+                                Console.WriteLine("Frames have different matricies - has some sort of animation");
+                        }
+                    }
+
+                    if (m == null)
+                    {
+                        Console.WriteLine("Animation matrix is null");
+                    }
+                    else
+                    {
+                        //Multiple the mesh initial matrix by the "animation initial matrix"
+                        model.Meshs[0].InitMatrix = Matrix.Multiply(model.Meshs[0].InitMatrix, m);
+                    }
+
+                    //Export the model, if it doesn't exist.
+                    var exporter = new GLTF2Export(ConsoleAppLogger.CreateLogger<Program>());
+                    string texturePath = @"C:\Temp\Conquer\Export\items\hair\texture";
+                    string modelPath = @"C:\Temp\Conquer\Export\items\hair";
+
+                    string meshId = new FileInfo(modelTexturePair.Item1).Name.Replace(new FileInfo(modelTexturePair.Item1).Extension, "");
+                    string textureId = new FileInfo(modelTexturePair.Item2).Name.Replace(new FileInfo(modelTexturePair.Item2).Extension, "");
+
+                    modelPath = Path.Combine(modelPath, $"{meshId}.gltf");
+                    texturePath = Path.Combine(texturePath, $"{textureId}.png");
+
+                    if (!File.Exists(modelPath))
+                    {
+                        var relativePAth = Path.GetRelativePath(new FileInfo(modelPath).Directory.ToString(), texturePath);
+                        exporter.AddSimple("hair", model.Meshs[0], relativePAth, true, false);
+                        using (StreamWriter tw = new StreamWriter(File.OpenWrite(modelPath)))
+                            exporter.Export(tw);
+                    }
+
+                    if (!File.Exists(texturePath))
+                        PngExporter.Export(File.OpenRead(Path.Combine(clientDirectory, modelTexturePair.Item2)), File.OpenWrite(texturePath));
+                    //Export the texture, if it doesn't exist.
+                }
+            }
+        }
+
         [Command("test-armor")]
         public void Ini_TestArmor([Argument][DirectoryExists] string clientDirectory)
         {
@@ -622,48 +705,13 @@ namespace C3_Playground
                 exporter.AddBody(model, texturePath);
                 exporter.AddAnimation("pose 1", model);
 
-                //C3Model? armorModel = null;
-                //using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\002131000.c3")))
-                //    armorModel = C3ModelLoader.Load(br);
-                //if (armorModel != null) 
-                //{
-                //    var armorPhy = armorModel.Meshs.Where(p => p.Name.ToLower() == "v_body").FirstOrDefault();
-                //    if (armorPhy != null)
-                //        exporter.AddToSocket("v_body", armorPhy, @"C:\Temp\Conquer\002131300.png");
-                //}
-
-                //C3Model? weaponModel = null;
-                //using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410280.C3")))
-                //    weaponModel = C3ModelLoader.Load(br);
-                //if (weaponModel != null)
-                //{
-                //    //Figure out the initial matrix
-                //    //Need to determine if the key frames are identical.
-                //    Matrix? m = null;
-                //    foreach (var frame in weaponModel.Animations[0].BoneKeyFrames)
-                //    {
-                //        if (m == null) m = frame.Matricies[0];
-                //        else
-                //        {
-                //            if (!frame.Matricies[0].Equals(m))
-                //                Console.WriteLine("Frames have different matricies - has some sort of animation");
-                //        }
-                //    }
-                //    weaponModel.Meshs[0].InitMatrix = Matrix.Multiply(model.Meshs[0].InitMatrix, m);
-                //    var weaponPhy = weaponModel.Meshs[0];
-                //    if (weaponPhy != null)
-                //    {
-                //        exporter.AddToSocket("v_r_weapon", weaponPhy, @"C:\Temp\Conquer\410285.png");
-                //        exporter.AddToSocket("v_l_weapon", weaponPhy, @"C:\Temp\Conquer\410285.png");
-                //    }
-                //}
-
-                foreach (var file in Directory.GetFiles(@"D:\Programming\Conquer\Clients\5165\c3\0004\410"))
+                string rootDir = @"D:\Programming\Conquer\Clients\5165\c3\0001\";
+                foreach (var file in Directory.GetFiles(rootDir, "*.c3", SearchOption.AllDirectories))
                 {
                     C3Model? newModel = new();
                     using (BinaryReader br = new BinaryReader(File.OpenRead(file)))
                         newModel = C3ModelLoader.Load(br);
-                    string fileName = new FileInfo(file).Name;
+                    string fileName = Path.GetRelativePath(rootDir, file).Replace(".c3", "").Replace(".C3", "");
                     if (newModel != null)
                         exporter.AddAnimation(fileName, newModel);
                 }

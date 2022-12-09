@@ -14,6 +14,26 @@ namespace C3
             _fileSet = new FileSet(clientDirectory);
 
         }
+        public List<Item> GetHair()
+        {
+            List<Item> list = new List<Item>();
+            foreach(var item in _fileSet.Armet.Where(p=> (p.Key / 1000) % 1000 == 119))
+            {
+                foreach (var subPart in item.Value.Parts)
+                {
+                    Item hairItem = new()
+                    {
+                        Name = item.Key.ToString(),
+                        Type = ItemType.Hair
+                    };
+                    if (TryGetObjAndTexture(subPart.MeshId, subPart.TextureId, out var val))
+                        hairItem.BaseModel.Add(0, val);
+
+                    list.Add(hairItem);
+                }
+            }
+            return list;
+        }
         public List<Item> GetItems()
         {
             List<Item> items = new ();
