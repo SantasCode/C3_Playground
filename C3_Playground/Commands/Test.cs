@@ -51,12 +51,10 @@ namespace C3_Playground.Commands
             if (myModel == null) return;
 
             Console.WriteLine($"{file}");
-            Console.WriteLine($"Mesh: {myModel.Meshs.Count} Anim: {myModel.Animations.Count}");
-            Console.WriteLine($"Cameras: {myModel.Cameras.Count} Effects: {myModel.Effects.Count}");
-            Console.WriteLine($"Shape: {myModel.Shapes.Count} Smotions: {myModel.ShapeMotions.Count}");
+            Console.WriteLine($"PHY : {myModel.Meshs.Count, 4} MOTI: {myModel.Animations.Count,4}");
+            Console.WriteLine($"CAME: {myModel.Cameras.Count, 4} PTCL: {myModel.Effects.Count,4}");
+            Console.WriteLine($"SHAP: {myModel.Shapes.Count, 4} SMOT: {myModel.ShapeMotions.Count,4}");
 
-            if (myModel.Meshs.Count == myModel.Animations.Count)
-                Console.WriteLine($"Equal parts of each.");
 
             for (int i = 0; i < myModel.Meshs.Count; i++)
             {
