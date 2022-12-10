@@ -55,6 +55,10 @@
     "test vbody": {
       "commandName": "Project",
       "commandLineArgs": "test-vbody \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "preview effect": {
+      "commandName": "Project",
+      "commandLineArgs": "preview player 1024 768 -a \"D:\\Programming\\Conquer\\Clients\\5579\\c3\\effect\\2NDMetempsychosis\\1.C3\" -b \"D:\\Programming\\Conquer\\Clients\\5579\\c3\\effect\\2NDMetempsychosis\\1.dds\""
     }
   }
 }
