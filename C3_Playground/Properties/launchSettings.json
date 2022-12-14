@@ -59,6 +59,10 @@
     "preview effect": {
       "commandName": "Project",
       "commandLineArgs": "preview player 1024 768 -a \"D:\\Programming\\Conquer\\Clients\\5579\\c3\\effect\\2NDMetempsychosis\\1.C3\" -b \"D:\\Programming\\Conquer\\Clients\\5579\\c3\\effect\\2NDMetempsychosis\\1.dds\""
+    },
+    "export effect": {
+      "commandName": "Project",
+      "commandLineArgs": "export effect \"D:\\Programming\\Conquer\\Clients\\5579\\c3\\effect\\2NDMetempsychosis\\1.C3\" \"D:\\Programming\\Conquer\\Clients\\5579\\c3\\effect\\2NDMetempsychosis\\1.dds\" \"C:\\Temp\\Conquer\\Export\\Effects\\test_effect_001.gltf\""
     }
   }
 }

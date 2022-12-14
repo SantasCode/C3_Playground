@@ -201,7 +201,15 @@ namespace C3_Playground.Preview
             }
 
             TargetElapsedTime = TimeSpan.FromSeconds(1f/24f);
-            GraphicsDevice.BlendState = BlendState.NonPremultiplied;
+            BlendState blend = new BlendState()
+            {
+                ColorSourceBlend = Blend.SourceColor,
+                //AlphaSourceBlend = Blend.SourceAlpha,
+                ColorDestinationBlend = Blend.One,
+                //AlphaDestinationBlend = Blend.InverseSourceAlpha,
+                ColorBlendFunction = BlendFunction.Add,
+            };
+            GraphicsDevice.BlendState = blend;
         }
 
         protected override void Update(GameTime gameTime)
@@ -260,8 +268,6 @@ namespace C3_Playground.Preview
             armetEffect.View = viewMatrix;
             armetEffect.Projection = projectionMatrix;
 
-            //GraphicsDevice.SetVertexBuffer(vertexBuffer);
-            //GraphicsDevice.Indices = indexBuffer;
 
             mountModels?.Draw(gameTime, mountEffect);
             armorModel?.Draw(gameTime, bodyEffect);
@@ -269,14 +275,6 @@ namespace C3_Playground.Preview
             weaponLModels?.Draw(gameTime, weaponLEffect);
             weaponRModels?.Draw(gameTime, weaponREffect);
 
-            //basicEffect.VertexColorEnabled = true;
-
-            //foreach (var pass in basicEffect.CurrentTechnique.Passes)
-            //{
-            //    pass.Apply();
-            //    //GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, indexBuffer.IndexCount);
-            //    GraphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, axisLines, 0, 3);
-            //}
             base.Draw(gameTime);
         }
     }
