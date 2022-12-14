@@ -1,5 +1,6 @@
 ﻿using C3;
 using C3_Playground.Preview.Model;
+using Cocona.Filters;
 using Microsoft.VisualBasic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,15 +11,16 @@ namespace C3_Playground.Preview
 {
     internal class RenderWindow : Game
     {
-        private GraphicsDeviceManager graphicsDeviceManager;
+        private readonly PreviewArgs _previewArgs;
+        
+        private readonly GraphicsDeviceManager graphicsDeviceManager;
 
         private VertexPositionColor[] axisLines;
 
-
         private Basic3dExampleCamera camera3D;
 
-        private BasicEffect bodyEffect;
-        private ModelRenderer myModels;
+        private AlphaTestEffect bodyEffect;
+        private ModelRenderer armorModel;
         private BasicEffect weaponLEffect;
         private ModelRenderer weaponLModels;
         private BasicEffect weaponREffect;
@@ -31,21 +33,17 @@ namespace C3_Playground.Preview
         Matrix viewMatrix;
         Matrix projectionMatrix;
 
-        private IndexBuffer indexBuffer;
-        private VertexBuffer vertexBuffer;
-
         private readonly string _modelFile;
         private readonly string _textureFile;
 
-        internal RenderWindow(string modelFile = "", string textureFile = "", int windowWidth = 1024, int windowHeight = 768)
+        internal RenderWindow(PreviewArgs previewArgs)
         {
-            _modelFile = modelFile;
-            _textureFile = textureFile;
+            _previewArgs = previewArgs;
 
             graphicsDeviceManager = new(this)
             {
-                PreferredBackBufferWidth = windowWidth,
-                PreferredBackBufferHeight = windowHeight
+                PreferredBackBufferWidth = _previewArgs.Width,
+                PreferredBackBufferHeight = _previewArgs.Height
             };
         }
 
@@ -63,9 +61,6 @@ namespace C3_Playground.Preview
             camera3D.TargetPositionToLookAt = new Vector3(0, 0, 0);
             camera3D.Position = new Vector3(100, 0, 0);
 
-            bodyEffect = new BasicEffect(GraphicsDevice);
-            bodyEffect.World = Matrix.Identity;
-            bodyEffect.TextureEnabled = true;
             
             weaponLEffect = new BasicEffect(GraphicsDevice);
             weaponLEffect.World = Matrix.Identity;
@@ -91,155 +86,131 @@ namespace C3_Playground.Preview
             viewMatrix = Matrix.CreateLookAt(cameraTarget + new Vector3(-1, -1, -1) * cameraPosition, cameraTarget, Vector3.Forward);
             projectionMatrix = Matrix.CreateOrthographic(500, 500, 0.001f, 20000f);
 
-            C3Model? model = null;
-            C3Model? modelAnimation = null;
-            Texture2D? modelTexture = null;
-            C3Model? weaponLModel = null;
-            Texture2D? weaponLTexture = null;
-            C3Model? weaponRModel = null;
-            Texture2D? weaponRTexture = null;
-            C3Model? mountModel = null;
-            Texture2D? mountTexture = null;
-            C3Model? mountAnimation = null;
-            
+            //CullClockwise draws the armorModel "mirrored" correctly but looks screwed up.
+            //GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;
+
+
+            C3Model? armorModel = null;
+            C3Model? armorAnimation = null;
+            Texture2D? armorTexture = null;
+
             C3Model? armetModel = null;
             Texture2D? armetTexture = null;
 
-            //CullClockwise draws the model "mirrored" correctly but looks screwed up.
-            //GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;
+            C3Model? weaponLModel = null;
+            Texture2D? weaponLTexture = null;
 
-            if (false)
+            C3Model? weaponRModel = null;
+            Texture2D? weaponRTexture = null;
+
+            C3Model? mountModel = null;
+            Texture2D? mountTexture = null;
+            C3Model? mountAnimation = null;
+
+            if (_previewArgs.Armor != null && _previewArgs.ArmorTexture != null)
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410280.c3")))
-                    model = C3ModelLoader.Load(br);
+                using (BinaryReader br = new BinaryReader(File.OpenRead(_previewArgs.Armor)))
+                    armorModel = C3ModelLoader.Load(br);
 
-                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\410285.dds", GraphicsDevice, false, out modelTexture);
-                bodyEffect.Texture = modelTexture;
+                DDSLib.DDSFromFile(_previewArgs.ArmorTexture, GraphicsDevice, false, out armorTexture);
+                //bodyEffect.Texture = armorTexture;
+                bodyEffect = new AlphaTestEffect(GraphicsDevice);
+                bodyEffect.World = Matrix.Identity;
+                bodyEffect.Texture = armorTexture;
             }
-            else if(true)
+
+            if (_previewArgs.Armet != null && _previewArgs.ArmetTexture != null)
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\003000000.c3" : _modelFile)))
-                    model = C3ModelLoader.Load(br);
-
-                DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\texture\003000000.dds" : _textureFile, GraphicsDevice, false, out modelTexture);
-                bodyEffect.Texture = modelTexture;
-
-                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\480330.c3")))
-                    weaponLModel = C3ModelLoader.Load(br);
-
-                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\480335.dds", GraphicsDevice, false, out weaponLTexture);
-                weaponLEffect.Texture = weaponLTexture;
-            }
-            else if (true) //Load a character w/ weapons and mount.
-            {
-                //Load a Mesh.
-                using (BinaryReader br = new BinaryReader(File.OpenRead(_modelFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\mesh\002000000.c3" : _modelFile)))
-                    model = C3ModelLoader.Load(br);
-
-                string animation = @"D:\Programming\Conquer\Clients\5579\c3\1002\000\100.C3";
-                using (BinaryReader br = new BinaryReader(File.OpenRead(animation)))
-                    modelAnimation = C3ModelLoader.Load(br);
-                if (model != null && modelAnimation != null)
-                {
-                    Console.WriteLine("Replaced motion with motion file");
-                    model.Animations = modelAnimation.Animations;
-                }
-
-                DDSLib.DDSFromFile(_textureFile == "" ? @"D:\Programming\Conquer\Clients\5165\c3\texture\002000000.dds" : _textureFile, GraphicsDevice, false, out modelTexture);
-                bodyEffect.Texture = modelTexture;
-
-
-                ///Armet
-                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\hair\002119044.C3")))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(_previewArgs.Armet)))
                     armetModel = C3ModelLoader.Load(br);
 
-                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\hair\002119544.dds", GraphicsDevice, false, out armetTexture);
+                DDSLib.DDSFromFile(_previewArgs.ArmetTexture, GraphicsDevice, false, out armetTexture);
                 armetEffect.Texture = armetTexture;
+            }
 
+            if (_previewArgs.LeftWeapon != null && _previewArgs.LeftWeaponTexture!= null)
+            {
+                using (BinaryReader br = new BinaryReader(File.OpenRead(_previewArgs.LeftWeapon)))
+                    weaponLModel= C3ModelLoader.Load(br);
 
-                ///Left Weapon
-                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\410080.c3")))
-                    weaponLModel = C3ModelLoader.Load(br);
-
-                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\410086.dds", GraphicsDevice, false, out weaponLTexture);
+                DDSLib.DDSFromFile(_previewArgs.LeftWeaponTexture, GraphicsDevice, false, out weaponLTexture);
                 weaponLEffect.Texture = weaponLTexture;
+            }
 
-
-                // Right Weapon
-                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\mesh\420010.c3")))
+            if (_previewArgs.RightWeapon != null && _previewArgs.RightWeaponTexture != null)
+            {
+                using (BinaryReader br = new BinaryReader(File.OpenRead(_previewArgs.RightWeapon)))
                     weaponRModel = C3ModelLoader.Load(br);
 
-                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\texture\420015.dds", GraphicsDevice, false, out weaponRTexture);
+                DDSLib.DDSFromFile(_previewArgs.RightWeaponTexture, GraphicsDevice, false, out weaponRTexture);
                 weaponREffect.Texture = weaponRTexture;
+            }
 
-
-                ///Mount
-                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5579\c3\Mount\819\8190000.C3")))
+            if (_previewArgs.Mount != null && _previewArgs.MountTexture != null)
+            {
+                using (BinaryReader br = new BinaryReader(File.OpenRead(_previewArgs.Mount)))
                     mountModel = C3ModelLoader.Load(br);
 
-                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5579\c3\Mount\819\8190000.dds", GraphicsDevice, false, out mountTexture);
+                DDSLib.DDSFromFile(_previewArgs.MountTexture, GraphicsDevice, false, out mountTexture);
                 mountEffect.Texture = mountTexture;
+            }
 
-                string mountAnim = @"D:\Programming\Conquer\Clients\5579\c3\Mount\819\100.C3";
-                using (BinaryReader br = new BinaryReader(File.OpenRead(mountAnim)))
+            if (_previewArgs.Motion != null)
+            {
+                using (BinaryReader br = new BinaryReader(File.OpenRead(_previewArgs.Motion)))
+                    armorAnimation = C3ModelLoader.Load(br);
+            }
+
+            if (_previewArgs.MountMotion != null)
+            {
+                using (BinaryReader br = new BinaryReader(File.OpenRead(_previewArgs.MountMotion)))
                     mountAnimation = C3ModelLoader.Load(br);
-                if (mountModel != null && mountAnimation != null)
-                {
-                    Console.WriteLine("Replaced motion with motion file");
-                    mountModel.Animations = mountAnimation.Animations;
-                }
-            }
-            else if (true) // Load effect w/o SHAP/SMOT
-            {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(@"D:\Programming\Conquer\Clients\5165\c3\effect\LuckyGuy\2.C3")))
-                    model = C3ModelLoader.Load(br, true);
-
-                //string animation = @"D:\Programming\Conquer\Clients\5579\c3\1002\000\100.C3";
-                //using (BinaryReader br = new BinaryReader(File.OpenRead(animation)))
-                //    modelAnimation = C3ModelLoader.Load(br);
-                //if (model != null && modelAnimation != null)
-                //{
-                //    Console.WriteLine("Replaced motion with motion file");
-                //    model.Animations = modelAnimation.Animations;
-                //}
-
-                DDSLib.DDSFromFile(@"D:\Programming\Conquer\Clients\5165\c3\effect\LuckyGuy\2.dds", GraphicsDevice, false, out modelTexture);
-                bodyEffect.Texture = modelTexture;
             }
 
 
-
-
-
-
-            if (model != null)
+            //Add model associations.
+            if (armorModel != null && armorTexture != null)
             {
-                myModels = new(model, GraphicsDevice, modelTexture);
+                if (armorAnimation != null)
+                    armorModel.Animations = armorAnimation.Animations;
 
+                this.armorModel = new(armorModel, GraphicsDevice, armorTexture);
             }
             if(armetModel != null && armetTexture != null)
             {
                 armetModels = new ModelRenderer(armetModel, GraphicsDevice, armetTexture);
-                armetModels.SetParent(0, myModels.NamedParts["v_armet"]);
+                armetModels.SetParent(0, this.armorModel.NamedParts["v_armet"]);
             }
             if (weaponLModel != null && weaponLTexture != null)
             {
                 weaponLModels = new(weaponLModel, GraphicsDevice, weaponLTexture);
-                weaponLModels.SetParent(0, myModels.NamedParts["v_l_weapon"]);
+                weaponLModels.SetParent(0, this.armorModel.NamedParts["v_l_weapon"]);
             }
             if (weaponRModel != null && weaponRTexture != null)
             {
                 weaponRModels = new(weaponRModel, GraphicsDevice, weaponRTexture);
-                weaponRModels.SetParent(0, myModels.NamedParts["v_r_weapon"]);
+                weaponRModels.SetParent(0, this.armorModel.NamedParts["v_r_weapon"]);
             }
             if (mountModel != null && mountTexture != null)
             {
-                mountModels = new(mountModel, GraphicsDevice, mountTexture);
-                myModels.SetParentAll(mountModels.NamedParts["v_mount"]);
-            }
-            TargetElapsedTime = TimeSpan.FromSeconds(1f/30f);
+                if (mountAnimation != null)
+                    mountModel.Animations = mountAnimation.Animations;
 
-            GraphicsDevice.BlendState = BlendState.NonPremultiplied;
+                mountModels = new(mountModel, GraphicsDevice, mountTexture);
+                this.armorModel.SetParentAll(mountModels.NamedParts["v_mount"]);
+
+            }
+
+            TargetElapsedTime = TimeSpan.FromSeconds(1f/24f);
+            BlendState blend = new BlendState()
+            {
+                ColorSourceBlend = Blend.One,
+                ColorDestinationBlend = Blend.One,
+                AlphaSourceBlend = Blend.Zero,
+                AlphaDestinationBlend = Blend.Zero,
+                ColorBlendFunction = BlendFunction.Add,
+            };
+            GraphicsDevice.BlendState = blend;
         }
 
         protected override void Update(GameTime gameTime)
@@ -265,7 +236,7 @@ namespace C3_Playground.Preview
             viewMatrix = Matrix.CreateRotationX(dx * MathHelper.PiOver4) * Matrix.CreateRotationY(dy * MathHelper.PiOver4) * Matrix.CreateRotationZ(dz * MathHelper.PiOver4) * viewMatrix;
             #endregion 3d Model Rotation
 
-            myModels?.Update(gameTime);
+            armorModel?.Update(gameTime);
             armetModels?.Update(gameTime);
             weaponLModels?.Update(gameTime);
             weaponRModels?.Update(gameTime);
@@ -277,6 +248,9 @@ namespace C3_Playground.Preview
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
+
+            GraphicsDevice.BlendState = BlendState.Additive;
+            GraphicsDevice.DepthStencilState = DepthStencilState.None;
 
             bodyEffect.World = Matrix.Identity;
             bodyEffect.View = viewMatrix;
@@ -298,24 +272,14 @@ namespace C3_Playground.Preview
             armetEffect.View = viewMatrix;
             armetEffect.Projection = projectionMatrix;
 
-            //GraphicsDevice.SetVertexBuffer(vertexBuffer);
-            //GraphicsDevice.Indices = indexBuffer;
 
             mountModels?.Draw(gameTime, mountEffect);
-            myModels?.Draw(gameTime, bodyEffect);
+            armorModel?.Draw(gameTime, bodyEffect);
             armetModels?.Draw(gameTime, armetEffect);
             weaponLModels?.Draw(gameTime, weaponLEffect);
             weaponRModels?.Draw(gameTime, weaponREffect);
 
-            //basicEffect.VertexColorEnabled = true;
-
-            //foreach (var pass in basicEffect.CurrentTechnique.Passes)
-            //{
-            //    pass.Apply();
-            //    //GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, indexBuffer.IndexCount);
-            //    GraphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, axisLines, 0, 3);
-            //}
-            base.Draw(gameTime);
+            //base.Draw(gameTime);
         }
     }
 }

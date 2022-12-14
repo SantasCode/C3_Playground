@@ -36,7 +36,7 @@ namespace C3.Exports
         public void AddBody(C3Model model, string? bodyTexturePath = null, bool externalTexture = false, bool includeChildren = true)
         {
             if (gltf.Nodes == null) gltf.Nodes = new();
-            if(gltf.Scenes == null) gltf.Scenes = new();
+            if (gltf.Scenes == null) gltf.Scenes = new();
 
             if (model.Meshs.Count != model.Animations.Count) _logger.LogWarning("Body model provided doesn't have the same number of motions as meshes");
 

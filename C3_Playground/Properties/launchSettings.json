@@ -1,76 +1,68 @@
 {
   "profiles": {
-    "WSL": {
-      "commandName": "WSL2",
-      "distributionName": ""
-    },
-    "test-mesh": {
-      "commandName": "Project",
-      "commandLineArgs": "test-mesh \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\003000000.c3\""
-    },
-    "test-load-obj 5579": {
-      "commandName": "Project",
-      "commandLineArgs": "test-load-obj \"D:\\Programming\\Conquer\\Clients\\5579\\c3\\mesh\\410330.C3\""
-    },
-    "test-load-obj 5165": {
-      "commandName": "Project",
-      "commandLineArgs": "test-load-obj \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\410330.C3\""
-    },
-    "test-load model": {
-      "commandName": "Project",
-      "commandLineArgs": "test-load-obj \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\""
-    },
-    "test-ini": {
-      "commandName": "Project",
-      "commandLineArgs": "test-ini \"D:\\Programming\\Conquer\\Clients\\5165\""
-    },
-    "test-meshes": {
-      "commandName": "Project",
-      "commandLineArgs": "test-meshes \"D:\\Programming\\Conquer\\Clients\\5579\\c3\""
-    },
-    "preview": {
-      "commandName": "Project",
-      "commandLineArgs": "preview"
-    },
-    "export-obj": {
-      "commandName": "Project",
-      "commandLineArgs": "export-obj \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\002000000.c3\" \"C:\\Temp\\2000000.obj\""
-    },
-    "export-json": {
-      "commandName": "Project",
-      "commandLineArgs": "export-json \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\" \"C:\\Temp\\Conquer\\001000000.json\""
-    },
-    "test-vbody": {
-      "commandName": "Project",
-      "commandLineArgs": "test-vbody \"D:\\Programming\\Conquer\\Clients\\5165\""
-    },
-    "export-gltf2": {
-      "commandName": "Project",
-      "commandLineArgs": "export-gltf2 \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\004000000.c3\" \"C:\\Temp\\Conquer\\004000000.png\" \"C:\\Temp\\Conquer\\Export\\004000000.gltf\""
-    },
-    "test-1h": {
-      "commandName": "Project",
-      "commandLineArgs": "test-1h \"D:\\Programming\\Conquer\\Clients\\5165\""
-    },
     "convert-dds": {
       "commandName": "Project",
       "commandLineArgs": "convert-dds \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\texture\\410036.dds\" \"C:\\Temp\\Conquer\\Export\\410036.png\""
     },
-    "test-2h": {
+    "preview": {
       "commandName": "Project",
-      "commandLineArgs": "test-2h \"D:\\Programming\\Conquer\\Clients\\5165\""
+      "commandLineArgs": "preview player 1024 768 -a \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\" -b \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\texture\\001000000.dds\" -h \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\hair\\001119055.C3\" -i \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\hair\\001119055.dds\" -w \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\410080.c3\" -x \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\texture\\410086.dds\" -s \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\420010.c3\" -t \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\texture\\420015.dds\" -m \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\1001\\000\\100.c3\" -p \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\Mount\\801\\8010000.C3\" -q \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\Mount\\801\\8010100.dds\" -r \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\Mount\\801\\100.C3\""
     },
-    "test-shield": {
+    "export gltf2": {
       "commandName": "Project",
-      "commandLineArgs": "test-shield \"D:\\Programming\\Conquer\\Clients\\5165\""
+      "commandLineArgs": "export gltf2 \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\" \"C:\\Temp\\Conquer\\001000000.png\" \"C:\\Temp\\Conquer\\Export\\001000000.gltf\""
     },
-    "test-armet": {
+    "export json": {
       "commandName": "Project",
-      "commandLineArgs": "test-armet \"D:\\Programming\\Conquer\\Clients\\5165\""
+      "commandLineArgs": "export json \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\001000000.c3\" \"C:\\Temp\\Conquer\\001000000.json\""
     },
-    "test-armor": {
+    "export batch onehand": {
       "commandName": "Project",
-      "commandLineArgs": "test-armor \"D:\\Programming\\Conquer\\Clients\\5165\""
+      "commandLineArgs": "export batch onehand \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "export batch 2h": {
+      "commandName": "Project",
+      "commandLineArgs": "export batch twohand \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "export batch shield": {
+      "commandName": "Project",
+      "commandLineArgs": "export batch shield \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "export batch armet": {
+      "commandName": "Project",
+      "commandLineArgs": "export batch armet \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "export batch armor": {
+      "commandName": "Project",
+      "commandLineArgs": "export batch armor \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "export batch hair": {
+      "commandName": "Project",
+      "commandLineArgs": "export batch hair \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "test mesh": {
+      "commandName": "Project",
+      "commandLineArgs": "test mesh \"D:\\Programming\\Conquer\\Clients\\5165\\c3\\mesh\\003000000.c3\""
+    },
+    "test ini": {
+      "commandName": "Project",
+      "commandLineArgs": "test ini \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "test meshes": {
+      "commandName": "Project",
+      "commandLineArgs": "test meshes \"D:\\Programming\\Conquer\\Clients\\5579\\c3\""
+    },
+    "test vbody": {
+      "commandName": "Project",
+      "commandLineArgs": "test-vbody \"D:\\Programming\\Conquer\\Clients\\5165\""
+    },
+    "preview effect": {
+      "commandName": "Project",
+      "commandLineArgs": "preview player 1024 768 -a \"D:\\Programming\\Conquer\\Clients\\5579\\c3\\effect\\2NDMetempsychosis\\1.C3\" -b \"D:\\Programming\\Conquer\\Clients\\5579\\c3\\effect\\2NDMetempsychosis\\1.dds\""
+    },
+    "export effect": {
+      "commandName": "Project",
+      "commandLineArgs": "export effect \"D:\\Programming\\Conquer\\Clients\\5579\\c3\\effect\\2NDMetempsychosis\\1.C3\" \"D:\\Programming\\Conquer\\Clients\\5579\\c3\\effect\\2NDMetempsychosis\\1.dds\" \"C:\\Temp\\Conquer\\Export\\Effects\\test_effect_001.gltf\""
     }
   }
 }
