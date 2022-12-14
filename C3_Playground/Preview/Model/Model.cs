@@ -36,7 +36,7 @@ namespace C3_Playground.Preview.Model
             foreach (var model in NamedParts.Values)
                 model.Update(gameTime);
         }
-        public void Draw(GameTime gameTime, BasicEffect basicEffect)
+        public void Draw(GameTime gameTime, Effect basicEffect)
         {
             if (IsBody)
                 NamedParts["v_body"].Draw(gameTime, basicEffect);
@@ -152,17 +152,17 @@ namespace C3_Playground.Preview.Model
             }
         }
 
-        public void Draw( GameTime gameTime, BasicEffect basicEffect)
+        public void Draw( GameTime gameTime, Effect basicEffect)
         {
 
             _graphicsDevice.SetVertexBuffer(VertexBuffer);
             _graphicsDevice.Indices = IndexBuffer;
 
-            foreach (var pass in basicEffect.CurrentTechnique.Passes)
+            foreach (var pass in ((AlphaTestEffect)basicEffect).CurrentTechnique.Passes)
             {
                 pass.Apply();
-                _graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, IndexBuffer.IndexCount);
             }
+            _graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, IndexBuffer.IndexCount);
         }
 
         public Vector3 CalculateVertex(Vector3 vertex, Matrix transform, float weight)

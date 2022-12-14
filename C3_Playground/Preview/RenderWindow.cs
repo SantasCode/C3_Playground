@@ -19,7 +19,7 @@ namespace C3_Playground.Preview
 
         private Basic3dExampleCamera camera3D;
 
-        private BasicEffect bodyEffect;
+        private AlphaTestEffect bodyEffect;
         private ModelRenderer armorModel;
         private BasicEffect weaponLEffect;
         private ModelRenderer weaponLModels;
@@ -61,9 +61,6 @@ namespace C3_Playground.Preview
             camera3D.TargetPositionToLookAt = new Vector3(0, 0, 0);
             camera3D.Position = new Vector3(100, 0, 0);
 
-            bodyEffect = new BasicEffect(GraphicsDevice);
-            bodyEffect.World = Matrix.Identity;
-            bodyEffect.TextureEnabled = true;
             
             weaponLEffect = new BasicEffect(GraphicsDevice);
             weaponLEffect.World = Matrix.Identity;
@@ -116,6 +113,9 @@ namespace C3_Playground.Preview
                     armorModel = C3ModelLoader.Load(br);
 
                 DDSLib.DDSFromFile(_previewArgs.ArmorTexture, GraphicsDevice, false, out armorTexture);
+                //bodyEffect.Texture = armorTexture;
+                bodyEffect = new AlphaTestEffect(GraphicsDevice);
+                bodyEffect.World = Matrix.Identity;
                 bodyEffect.Texture = armorTexture;
             }
 
@@ -167,6 +167,7 @@ namespace C3_Playground.Preview
                     mountAnimation = C3ModelLoader.Load(br);
             }
 
+
             //Add model associations.
             if (armorModel != null && armorTexture != null)
             {
@@ -203,10 +204,10 @@ namespace C3_Playground.Preview
             TargetElapsedTime = TimeSpan.FromSeconds(1f/24f);
             BlendState blend = new BlendState()
             {
-                ColorSourceBlend = Blend.SourceColor,
-                //AlphaSourceBlend = Blend.SourceAlpha,
+                ColorSourceBlend = Blend.One,
                 ColorDestinationBlend = Blend.One,
-                //AlphaDestinationBlend = Blend.InverseSourceAlpha,
+                AlphaSourceBlend = Blend.Zero,
+                AlphaDestinationBlend = Blend.Zero,
                 ColorBlendFunction = BlendFunction.Add,
             };
             GraphicsDevice.BlendState = blend;
@@ -248,6 +249,9 @@ namespace C3_Playground.Preview
         {
             GraphicsDevice.Clear(Color.Black);
 
+            GraphicsDevice.BlendState = BlendState.Additive;
+            GraphicsDevice.DepthStencilState = DepthStencilState.None;
+
             bodyEffect.World = Matrix.Identity;
             bodyEffect.View = viewMatrix;
             bodyEffect.Projection = projectionMatrix;
@@ -275,7 +279,7 @@ namespace C3_Playground.Preview
             weaponLModels?.Draw(gameTime, weaponLEffect);
             weaponRModels?.Draw(gameTime, weaponREffect);
 
-            base.Draw(gameTime);
+            //base.Draw(gameTime);
         }
     }
 }
