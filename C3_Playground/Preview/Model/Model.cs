@@ -158,7 +158,7 @@ namespace C3_Playground.Preview.Model
             _graphicsDevice.SetVertexBuffer(VertexBuffer);
             _graphicsDevice.Indices = IndexBuffer;
 
-            foreach (var pass in ((AlphaTestEffect)basicEffect).CurrentTechnique.Passes)
+            foreach (var pass in basicEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
             }
